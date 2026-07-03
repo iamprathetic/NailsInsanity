@@ -107,15 +107,6 @@ export default async function HomePage() {
             why every hand-painted set is designed to be worn when you want, and
             reused whenever you want.
           </h2>
-          <div className="mt-9">
-            <ButtonLink
-              href="/shop"
-              size="lg"
-              className="bg-white text-navy hover:bg-mist"
-            >
-              Explore designs
-            </ButtonLink>
-          </div>
         </div>
       </section>
     </>

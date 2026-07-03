@@ -9,10 +9,6 @@ export function Footer() {
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-2">
           <Logo />
-          <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink/60">
-            Hand painted, reusable press-on nails — salon-quality nail art,
-            crafted by hand and delivered across India.
-          </p>
         </div>
 
         <div>
