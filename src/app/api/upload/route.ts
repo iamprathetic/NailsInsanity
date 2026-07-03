@@ -43,21 +43,48 @@ export async function POST(req: Request) {
 
   const ext = file.type.split("/")[1].replace("jpeg", "jpg");
   const name = `${crypto.randomUUID()}.${ext}`;
+  const onVercel = Boolean(process.env.VERCEL);
 
   // Production: store in Vercel Blob.
   if (process.env.BLOB_READ_WRITE_TOKEN) {
-    const blob = await put(`products/${name}`, file, {
-      access: "public",
-      contentType: file.type,
-    });
-    return NextResponse.json({ ok: true, url: blob.url });
+    try {
+      const blob = await put(`products/${name}`, file, {
+        access: "public",
+        contentType: file.type,
+      });
+      return NextResponse.json({ ok: true, url: blob.url });
+    } catch (err) {
+      console.error("Blob upload failed:", err);
+      return NextResponse.json(
+        { error: `Blob upload failed: ${(err as Error).message}` },
+        { status: 500 }
+      );
+    }
+  }
+
+  // On Vercel without a Blob token, local disk writes fail (read-only FS).
+  if (onVercel) {
+    return NextResponse.json(
+      {
+        error:
+          "Image storage isn't configured. Create a Blob store in Vercel, connect it to this project, and redeploy.",
+      },
+      { status: 500 }
+    );
   }
 
   // Local dev: write to /public/uploads.
-  const bytes = Buffer.from(await file.arrayBuffer());
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadDir, { recursive: true });
-  await writeFile(path.join(uploadDir, name), bytes);
-
-  return NextResponse.json({ ok: true, url: `/uploads/${name}` });
+  try {
+    const bytes = Buffer.from(await file.arrayBuffer());
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    await mkdir(uploadDir, { recursive: true });
+    await writeFile(path.join(uploadDir, name), bytes);
+    return NextResponse.json({ ok: true, url: `/uploads/${name}` });
+  } catch (err) {
+    console.error("Local upload failed:", err);
+    return NextResponse.json(
+      { error: `Upload failed: ${(err as Error).message}` },
+      { status: 500 }
+    );
+  }
 }
