@@ -1,0 +1,58 @@
+// NailsInsanity database schema
+// Uses PostgreSQL (Neon in production, and locally too). Set DATABASE_URL to
+// your Neon connection string in .env, then run `npx prisma db push` to create
+// the tables.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String   @default("")
+  // Price in whole rupees (INR). e.g. 499 = ₹499
+  price       Int
+  // JSON-encoded string arrays (SQLite has no native array type)
+  sizes       String   @default("[]") // e.g. ["XS","S","M","L"]
+  images      String   @default("[]") // e.g. ["/uploads/abc.jpg"]
+  stock       Int      @default(0)
+  active      Boolean  @default(true)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([active])
+}
+
+model Order {
+  id                String   @id @default(cuid())
+  // Short human-friendly reference shown to the customer, e.g. NI-8F3K2A
+  reference         String   @unique
+  customerName      String
+  email             String
+  phone             String
+  address           String
+  city              String
+  state             String
+  pincode           String
+  // JSON-encoded array of line items:
+  // [{ productId, name, size, qty, price }]
+  items             String
+  // Amount in whole rupees (INR)
+  total             Int
+  // pending -> paid -> shipped -> delivered ; or cancelled
+  status            String   @default("pending")
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([status])
+}

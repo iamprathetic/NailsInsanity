@@ -1,26 +1,69 @@
 @import "tailwindcss";
 
+/* ── NailsInsanity design tokens ─────────────────────────────────────────
+   Deep navy on clean white, elegant high-contrast serif display type.
+   Derived from the brand logo. */
+@theme {
+  --color-navy: #16256b; /* primary brand navy */
+  --color-navy-dark: #0f1a4d; /* deeper navy for hovers */
+  --color-royal: #2647cf; /* brighter royal-blue accent */
+  --color-ink: #131832; /* near-black navy body text */
+  --color-mist: #f5f7fd; /* very light blue-gray section bg */
+  --color-line: #e6e9f5; /* hairline borders */
+
+  --font-serif: var(--font-playfair);
+  --font-sans: var(--font-inter);
+}
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #131832;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  border-color: var(--color-line);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Elegant serif for all display headings by default */
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  letter-spacing: -0.01em;
+}
+
+/* Utility: uppercase spaced label (matches the logo tagline treatment) */
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* Subtle entrance used on section content */
+@keyframes ni-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-up {
+  animation: ni-fade-up 0.6s ease-out both;
 }
