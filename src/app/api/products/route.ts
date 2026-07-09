@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/auth";
 import { productInputSchema } from "@/lib/validation";
 import { slugify } from "@/lib/format";
+import { resolveCollectionId } from "@/lib/collections";
 
 // Create a product (admin only).
 export async function POST(req: Request) {
@@ -27,6 +28,10 @@ export async function POST(req: Request) {
   const data = parsed.data;
 
   const slug = await uniqueSlug(data.name);
+  const collectionId = await resolveCollectionId({
+    collectionId: data.collectionId,
+    newCollectionName: data.newCollectionName,
+  });
 
   const product = await prisma.product.create({
     data: {
@@ -39,6 +44,7 @@ export async function POST(req: Request) {
       stock: data.stock,
       active: data.active,
       featured: data.featured,
+      collectionId,
     },
   });
 

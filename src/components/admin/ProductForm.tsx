@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/Button";
+import type { CollectionOption } from "@/lib/collections";
 
 export type ProductFormData = {
   id?: string;
@@ -14,6 +15,7 @@ export type ProductFormData = {
   stock: number;
   active: boolean;
   featured: boolean;
+  collectionId: string | null;
 };
 
 const empty: ProductFormData = {
@@ -25,16 +27,31 @@ const empty: ProductFormData = {
   stock: 0,
   active: true,
   featured: false,
+  collectionId: null,
 };
+
+// Sentinel select value for "create a new collection".
+const NEW_COLLECTION = "__new__";
 
 const field =
   "w-full rounded-xl border border-line bg-white px-4 py-2.5 text-sm text-ink outline-none focus:border-navy";
 
-export function ProductForm({ initial }: { initial?: ProductFormData }) {
+export function ProductForm({
+  initial,
+  collections,
+}: {
+  initial?: ProductFormData;
+  collections: CollectionOption[];
+}) {
   const router = useRouter();
   const isEdit = Boolean(initial?.id);
   const [data, setData] = useState<ProductFormData>(initial ?? empty);
   const [sizeInput, setSizeInput] = useState("");
+  // Collection picker: the selected option ("" = none, an id, or NEW_COLLECTION).
+  const [collectionChoice, setCollectionChoice] = useState<string>(
+    initial?.collectionId ?? ""
+  );
+  const [newCollectionName, setNewCollectionName] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -79,6 +96,13 @@ export function ProductForm({ initial }: { initial?: ProductFormData }) {
     setError("");
     if (!data.name.trim()) return setError("Please enter a product name.");
     if (data.price < 0) return setError("Price cannot be negative.");
+
+    // Resolve the collection choice into what the API expects.
+    const creatingCollection = collectionChoice === NEW_COLLECTION;
+    if (creatingCollection && !newCollectionName.trim()) {
+      return setError("Please enter a name for the new collection.");
+    }
+
     setSaving(true);
 
     const url = isEdit ? `/api/products/${data.id}` : "/api/products";
@@ -95,6 +119,8 @@ export function ProductForm({ initial }: { initial?: ProductFormData }) {
         stock: Number(data.stock),
         active: data.active,
         featured: data.featured,
+        collectionId: creatingCollection ? null : collectionChoice || null,
+        newCollectionName: creatingCollection ? newCollectionName.trim() : undefined,
       }),
     });
 
@@ -149,6 +175,38 @@ export function ProductForm({ initial }: { initial?: ProductFormData }) {
             onChange={(e) => set("stock", Number(e.target.value))}
           />
         </div>
+      </div>
+
+      {/* Collection */}
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-navy">
+          Collection
+        </label>
+        <p className="mb-2 text-xs text-ink/50">
+          Group this product into a collection, or create a new one. Leave as
+          &ldquo;No collection&rdquo; if you don&rsquo;t want one.
+        </p>
+        <select
+          className={field}
+          value={collectionChoice}
+          onChange={(e) => setCollectionChoice(e.target.value)}
+        >
+          <option value="">No collection</option>
+          {collections.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+          <option value={NEW_COLLECTION}>+ Create new collection…</option>
+        </select>
+        {collectionChoice === NEW_COLLECTION && (
+          <input
+            className={`${field} mt-2`}
+            value={newCollectionName}
+            onChange={(e) => setNewCollectionName(e.target.value)}
+            placeholder="New collection name (e.g. Nude Shades)"
+          />
+        )}
       </div>
 
       {/* Description */}

@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { AnnouncementBar } from "@/components/AnnouncementBar";
 
 // The admin panel has its own layout, so we hide the storefront nav/footer
 // there. Everything else gets the standard site chrome.
@@ -15,6 +16,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Nav />
+      <AnnouncementBar />
       <main className="flex-1">{children}</main>
       <Footer />
     </>

@@ -14,6 +14,7 @@ export type ProductView = {
   stock: number;
   active: boolean;
   featured: boolean;
+  collectionId: string | null;
 };
 
 type ProductRow = {
@@ -27,6 +28,7 @@ type ProductRow = {
   stock: number;
   active: boolean;
   featured: boolean;
+  collectionId: string | null;
 };
 
 export function toProductView(row: ProductRow): ProductView {
@@ -41,6 +43,7 @@ export function toProductView(row: ProductRow): ProductView {
     stock: row.stock,
     active: row.active,
     featured: row.featured,
+    collectionId: row.collectionId,
   };
 }
 

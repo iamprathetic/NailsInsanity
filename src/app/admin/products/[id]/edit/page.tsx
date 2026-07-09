@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { toProductView } from "@/lib/products";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { ProductForm } from "@/components/admin/ProductForm";
+import { getCollections } from "@/lib/collections";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,10 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const row = await prisma.product.findUnique({ where: { id } });
+  const [row, collections] = await Promise.all([
+    prisma.product.findUnique({ where: { id } }),
+    getCollections(),
+  ]);
   if (!row) notFound();
   const p = toProductView(row);
 
@@ -29,6 +33,7 @@ export default async function EditProductPage({
       <h1 className="font-display text-3xl text-navy">Edit product</h1>
       <div className="mt-8">
         <ProductForm
+          collections={collections}
           initial={{
             id: p.id,
             name: p.name,
@@ -39,6 +44,7 @@ export default async function EditProductPage({
             stock: p.stock,
             active: p.active,
             featured: p.featured,
+            collectionId: p.collectionId,
           }}
         />
       </div>

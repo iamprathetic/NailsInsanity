@@ -11,8 +11,12 @@ export default async function AdminProductsPage() {
   // Include inactive products here (admin sees everything).
   const rows = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
+    include: { collection: true },
   });
-  const products = rows.map(toProductView);
+  const products = rows.map((r) => ({
+    ...toProductView(r),
+    collectionName: r.collection?.name ?? null,
+  }));
 
   return (
     <AdminShell>
@@ -68,9 +72,16 @@ export default async function AdminProductsPage() {
                       </div>
                       <div>
                         <p className="font-medium text-navy">{p.name}</p>
-                        {p.featured && (
-                          <span className="text-xs text-royal">Featured</span>
-                        )}
+                        <div className="flex flex-wrap gap-x-2 text-xs">
+                          {p.collectionName && (
+                            <span className="text-ink/50">
+                              {p.collectionName}
+                            </span>
+                          )}
+                          {p.featured && (
+                            <span className="text-royal">Featured</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </td>

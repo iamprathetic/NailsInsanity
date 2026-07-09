@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/auth";
 import { productInputSchema } from "@/lib/validation";
+import { resolveCollectionId } from "@/lib/collections";
 
 // Update a product (admin only).
 export async function PUT(
@@ -34,6 +35,11 @@ export async function PUT(
   }
   const data = parsed.data;
 
+  const collectionId = await resolveCollectionId({
+    collectionId: data.collectionId,
+    newCollectionName: data.newCollectionName,
+  });
+
   await prisma.product.update({
     where: { id },
     data: {
@@ -45,6 +51,7 @@ export async function PUT(
       stock: data.stock,
       active: data.active,
       featured: data.featured,
+      collectionId,
     },
   });
 

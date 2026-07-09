@@ -67,3 +67,19 @@ h3,
 .animate-fade-up {
   animation: ni-fade-up 0.6s ease-out both;
 }
+
+/* Scrolling announcement / promo bar (marquee) */
+@keyframes ni-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: ni-marquee 48s linear infinite;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
+}

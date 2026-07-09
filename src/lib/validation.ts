@@ -9,6 +9,10 @@ export const productInputSchema = z.object({
   stock: z.coerce.number().int().min(0).max(1_000_000).default(0),
   active: z.boolean().default(true),
   featured: z.boolean().default(false),
+  // Collection assignment: either an existing collection id, or a new
+  // collection name to create. Both optional (product can have no collection).
+  collectionId: z.string().trim().optional().nullable(),
+  newCollectionName: z.string().trim().max(80).optional(),
 });
 
 export type ProductInput = z.infer<typeof productInputSchema>;

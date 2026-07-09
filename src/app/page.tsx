@@ -16,7 +16,7 @@ export default async function HomePage() {
     <>
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-gradient-to-b from-mist to-white">
-        <div className="mx-auto max-w-6xl px-5 py-24 text-center md:py-32">
+        <div className="mx-auto max-w-6xl px-5 pt-24 pb-12 text-center md:pt-32 md:pb-16">
           <p className="eyebrow animate-fade-up text-royal">
             Hand Painted Press On Nails
           </p>
@@ -29,41 +29,11 @@ export default async function HomePage() {
             Hand-painted reusable press-on nails for women who value quality,
             convenience, and flexibility.
           </p>
-          <div className="animate-fade-up mt-9 flex flex-wrap items-center justify-center gap-3">
-            <ButtonLink href="/shop" size="lg">
-              Shop the collection
-            </ButtonLink>
-            <ButtonLink href="/contact" size="lg" variant="outline">
-              Get in touch
-            </ButtonLink>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Trust badges ─────────────────────────────────────── */}
-      <section className="border-y border-line">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 divide-y divide-line px-5 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-          {[
-            {
-              title: "Hand Painted",
-              desc: "Every design is painted by hand with attention to detail.",
-            },
-            { title: "Reusable", desc: "Wear, remove, repeat" },
-            {
-              title: "24 Nails Included",
-              desc: "Multiple sizes in every set for a better fit.",
-            },
-          ].map((b) => (
-            <div key={b.title} className="px-4 py-8 text-center">
-              <h3 className="font-display text-xl text-navy">{b.title}</h3>
-              <p className="mt-1 text-sm text-ink/60">{b.desc}</p>
-            </div>
-          ))}
         </div>
       </section>
 
       {/* ── Featured products ────────────────────────────────── */}
-      <section className="mx-auto max-w-6xl px-5 py-20">
+      <section className="mx-auto max-w-6xl px-5 pt-8 pb-20">
         <div className="flex items-end justify-between">
           <div>
             <p className="eyebrow text-royal">The Collection</p>

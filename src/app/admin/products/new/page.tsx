@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { ProductForm } from "@/components/admin/ProductForm";
+import { getCollections } from "@/lib/collections";
 
-export default function NewProductPage() {
+export const dynamic = "force-dynamic";
+
+export default async function NewProductPage() {
+  const collections = await getCollections();
   return (
     <AdminShell>
       <nav className="mb-4 text-sm text-ink/50">
@@ -17,7 +21,7 @@ export default function NewProductPage() {
         Fill in the details below. Only the name and price are required.
       </p>
       <div className="mt-8">
-        <ProductForm />
+        <ProductForm collections={collections} />
       </div>
     </AdminShell>
   );

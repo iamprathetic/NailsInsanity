@@ -28,7 +28,20 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Optional grouping of products (e.g. "Nude Shades", "Festive 2026").
+  collectionId String?
+  collection   Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+
   @@index([active])
+  @@index([collectionId])
+}
+
+model Collection {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  products  Product[]
 }
 
 model Order {
