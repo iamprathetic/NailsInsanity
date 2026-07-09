@@ -176,8 +176,12 @@ export function ProductDetail({ product }: { product: ProductView }) {
         </div>
 
         <ul className="mt-8 space-y-2 border-t border-line pt-6 text-sm text-ink/60">
-          <li>✓ Hand painted, reusable press-on nails</li>
-          <li>✓ Free shipping across India</li>
+          <li>✓ Hand-painted with precision</li>
+          <li>✓ Designed to be reused</li>
+          <li>✓ 24 nails in every set</li>
+          <li>✓ Available in multiple nail shapes</li>
+          <li>✓ Premium finish and durability</li>
+          <li>✓ Made for modern lifestyles</li>
         </ul>
       </div>
     </div>
