@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/components/CartProvider";
 import { formatPrice } from "@/lib/format";
 import { ButtonLink } from "@/components/Button";
@@ -38,14 +39,15 @@ export default function CartPage() {
             >
               <Link
                 href={`/product/${item.slug}`}
-                className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-mist"
+                className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-mist"
               >
                 {item.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={item.image}
                     alt={item.name}
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="96px"
+                    className="object-cover"
                   />
                 ) : null}
               </Link>

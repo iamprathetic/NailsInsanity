@@ -7,6 +7,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname),
   },
+  // Allow Next.js to optimize product images served from Vercel Blob.
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

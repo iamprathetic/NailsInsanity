@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { toProductView } from "@/lib/products";
 import { formatPrice } from "@/lib/format";
@@ -60,13 +61,14 @@ export default async function AdminProductsPage() {
                 <tr key={p.id}>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-mist">
+                      <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-mist">
                         {p.images[0] ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
+                          <Image
                             src={p.images[0]}
                             alt=""
-                            className="h-full w-full object-cover"
+                            fill
+                            sizes="44px"
+                            className="object-cover"
                           />
                         ) : null}
                       </div>

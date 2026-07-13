@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { ProductView } from "@/lib/products";
 import { formatPrice } from "@/lib/format";
@@ -49,13 +50,15 @@ export function ProductDetail({ product }: { product: ProductView }) {
     <div className="grid gap-10 md:grid-cols-2 md:gap-14">
       {/* Gallery */}
       <div>
-        <div className="aspect-square overflow-hidden rounded-3xl bg-mist">
+        <div className="relative aspect-square overflow-hidden rounded-3xl bg-mist">
           {product.images[activeImage] ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={product.images[activeImage]}
               alt={product.name}
-              className="h-full w-full object-cover"
+              fill
+              priority
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="object-cover"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-navy/20">
@@ -78,15 +81,16 @@ export function ProductDetail({ product }: { product: ProductView }) {
               <button
                 key={i}
                 onClick={() => setActiveImage(i)}
-                className={`h-20 w-20 overflow-hidden rounded-xl border-2 transition-colors ${
+                className={`relative h-20 w-20 overflow-hidden rounded-xl border-2 transition-colors ${
                   i === activeImage ? "border-navy" : "border-transparent"
                 }`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={img}
                   alt={`${product.name} ${i + 1}`}
-                  className="h-full w-full object-cover"
+                  fill
+                  sizes="80px"
+                  className="object-cover"
                 />
               </button>
             ))}
