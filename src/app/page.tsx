@@ -1,16 +1,13 @@
-import { ButtonLink } from "@/components/Button";
 import { ProductCard } from "@/components/ProductCard";
-import { getFeaturedProducts, getActiveProducts } from "@/lib/products";
+import { getHomeSections } from "@/lib/collections";
+import type { ProductView } from "@/lib/products";
 
-// Render on demand so newly-added / featured products always show up.
+// Render on demand so newly-added products / collections always show up.
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const featured = await getFeaturedProducts(4);
-  // Fall back to newest products if nothing is flagged "featured" yet.
-  const showcase = featured.length
-    ? featured
-    : (await getActiveProducts()).slice(0, 4);
+  const { collections, uncategorized } = await getHomeSections();
+  const isEmpty = collections.length === 0 && uncategorized.length === 0;
 
   return (
     <>
@@ -32,31 +29,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Featured products ────────────────────────────────── */}
-      <section className="mx-auto max-w-6xl px-5 pt-8 pb-20">
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="eyebrow text-royal">The Collection</p>
-            <h2 className="mt-2 text-4xl text-navy">Latest designs</h2>
-          </div>
-          <ButtonLink
-            href="/shop"
-            variant="ghost"
-            size="sm"
-            className="hidden sm:inline-flex"
-          >
-            View all →
-          </ButtonLink>
-        </div>
-
-        {showcase.length > 0 ? (
-          <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-9 lg:grid-cols-4">
-            {showcase.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
-        ) : (
-          <div className="mt-10 rounded-3xl border border-dashed border-line bg-mist/50 px-6 py-20 text-center">
+      {/* ── Collection sections ──────────────────────────────── */}
+      {isEmpty ? (
+        <section className="mx-auto max-w-6xl px-5 pt-8 pb-20">
+          <div className="rounded-3xl border border-dashed border-line bg-mist/50 px-6 py-20 text-center">
             <h3 className="font-display text-2xl text-navy">
               New designs dropping soon
             </h3>
@@ -65,8 +41,26 @@ export default async function HomePage() {
               or follow along on Instagram for first looks.
             </p>
           </div>
-        )}
-      </section>
+        </section>
+      ) : (
+        <>
+          {collections.map((c) => (
+            <ProductSection
+              key={c.id}
+              eyebrow="Collection"
+              title={c.name}
+              products={c.products}
+            />
+          ))}
+          {uncategorized.length > 0 && (
+            <ProductSection
+              eyebrow="The Collection"
+              title={collections.length ? "More designs" : "Latest designs"}
+              products={uncategorized}
+            />
+          )}
+        </>
+      )}
 
       {/* ── Brand strip ──────────────────────────────────────── */}
       <section className="bg-navy text-white">
@@ -80,5 +74,29 @@ export default async function HomePage() {
         </div>
       </section>
     </>
+  );
+}
+
+function ProductSection({
+  eyebrow,
+  title,
+  products,
+}: {
+  eyebrow: string;
+  title: string;
+  products: ProductView[];
+}) {
+  return (
+    <section className="mx-auto max-w-6xl px-5 pt-8 pb-14">
+      <div>
+        <p className="eyebrow text-royal">{eyebrow}</p>
+        <h2 className="mt-2 text-4xl text-navy">{title}</h2>
+      </div>
+      <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-9 lg:grid-cols-4">
+        {products.map((p) => (
+          <ProductCard key={p.id} product={p} />
+        ))}
+      </div>
+    </section>
   );
 }
