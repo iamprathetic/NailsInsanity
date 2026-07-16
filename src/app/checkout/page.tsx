@@ -44,7 +44,7 @@ const emptyForm = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, total, clear } = useCart();
+  const { items, total, clear, mysteryCount } = useCart();
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -269,6 +269,14 @@ export default function CheckoutPage() {
                 <span className="text-navy">{formatPrice(i.price * i.qty)}</span>
               </li>
             ))}
+            {mysteryCount > 0 && (
+              <li className="flex justify-between gap-3 text-sm">
+                <span className="text-ink/70">
+                  🎁 Mystery Set × {mysteryCount}
+                </span>
+                <span className="text-green-700">FREE</span>
+              </li>
+            )}
           </ul>
           <dl className="mt-5 space-y-3 border-t border-line pt-4 text-sm">
             <div className="flex justify-between">

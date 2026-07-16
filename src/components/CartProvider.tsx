@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { MYSTERY_EVERY } from "@/lib/mystery";
 
 export type CartItem = {
   productId: string;
@@ -23,6 +24,9 @@ type CartContextValue = {
   items: CartItem[];
   count: number;
   total: number;
+  // Free "buy 2, get 1" mystery sets earned: floor(count / 2).
+  mysteryCount: number;
+  hydrated: boolean;
   addItem: (item: CartItem) => void;
   removeItem: (productId: string, size: string) => void;
   setQty: (productId: string, size: string, qty: number) => void;
@@ -64,11 +68,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const value = useMemo<CartContextValue>(() => {
     const count = items.reduce((n, i) => n + i.qty, 0);
     const total = items.reduce((sum, i) => sum + i.price * i.qty, 0);
+    const mysteryCount = Math.floor(count / MYSTERY_EVERY);
 
     return {
       items,
       count,
       total,
+      mysteryCount,
+      hydrated,
       addItem: (item) =>
         setItems((prev) => {
           const idx = prev.findIndex((p) =>
@@ -95,7 +102,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ),
       clear: () => setItems([]),
     };
-  }, [items]);
+  }, [items, hydrated]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

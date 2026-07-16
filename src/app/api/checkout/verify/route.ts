@@ -6,6 +6,7 @@ import {
 } from "@/lib/razorpay";
 import { notifyOwnerOfOrder } from "@/lib/telegram";
 import { parseJsonArray } from "@/lib/format";
+import { MYSTERY_PRODUCT_ID } from "@/lib/mystery";
 
 type LineItem = {
   productId: string;
@@ -86,6 +87,8 @@ export async function POST(req: Request) {
       },
     });
     for (const item of items) {
+      // The free mystery set is not a real product — skip stock updates for it.
+      if (item.productId === MYSTERY_PRODUCT_ID) continue;
       await tx.product.update({
         where: { id: item.productId },
         data: { stock: { decrement: item.qty } },

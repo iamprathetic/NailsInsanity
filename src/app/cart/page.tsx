@@ -7,7 +7,7 @@ import { formatPrice } from "@/lib/format";
 import { ButtonLink } from "@/components/Button";
 
 export default function CartPage() {
-  const { items, total, setQty, removeItem } = useCart();
+  const { items, total, setQty, removeItem, mysteryCount } = useCart();
 
   if (items.length === 0) {
     return (
@@ -31,6 +31,7 @@ export default function CartPage() {
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_20rem]">
         {/* Line items */}
+        <div>
         <ul className="divide-y divide-line">
           {items.map((item) => (
             <li
@@ -104,6 +105,30 @@ export default function CartPage() {
           ))}
         </ul>
 
+          {mysteryCount > 0 ? (
+            <div className="mt-6 rounded-2xl border border-royal/20 bg-royal/5 p-5">
+              <div className="flex items-center gap-4">
+                <span className="text-3xl">🎁</span>
+                <div className="flex-1">
+                  <p className="font-display text-lg text-navy">
+                    Mystery Set × {mysteryCount}{" "}
+                    <span className="text-green-700">— FREE</span>
+                  </p>
+                  <p className="text-sm text-ink/60">
+                    A surprise hand-picked set, revealed when your order arrives!
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-6 rounded-2xl border border-dashed border-royal/30 bg-royal/5 p-4 text-center text-sm text-ink/70">
+              Add <span className="font-semibold text-royal">1 more set</span> to
+              unlock a{" "}
+              <span className="font-semibold text-royal">FREE Mystery Set</span> 🎁
+            </div>
+          )}
+        </div>
+
         {/* Summary */}
         <aside className="h-fit rounded-2xl border border-line bg-mist/50 p-6">
           <h2 className="font-display text-xl text-navy">Order summary</h2>
@@ -112,6 +137,12 @@ export default function CartPage() {
               <dt className="text-ink/60">Subtotal</dt>
               <dd className="text-navy">{formatPrice(total)}</dd>
             </div>
+            {mysteryCount > 0 && (
+              <div className="flex justify-between">
+                <dt className="text-ink/60">Mystery Set × {mysteryCount}</dt>
+                <dd className="text-green-700">FREE</dd>
+              </div>
+            )}
             <div className="flex justify-between">
               <dt className="text-ink/60">Shipping</dt>
               <dd className="text-green-700">Free</dd>

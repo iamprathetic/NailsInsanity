@@ -7,6 +7,11 @@ import {
   isRazorpayConfigured,
   getRazorpayClient,
 } from "@/lib/razorpay";
+import {
+  MYSTERY_EVERY,
+  MYSTERY_PRODUCT_ID,
+  MYSTERY_NAME,
+} from "@/lib/mystery";
 
 const bodySchema = z.object({
   customer: customerSchema,
@@ -78,6 +83,21 @@ export async function POST(req: Request) {
 
   if (total <= 0) {
     return NextResponse.json({ error: "Invalid order total." }, { status: 400 });
+  }
+
+  // Free mystery sets: one for every MYSTERY_EVERY paid sets. Computed here on
+  // the server so it can't be manipulated by the client. Free (price 0), so the
+  // total is unchanged. The owner picks the actual set(s) when fulfilling.
+  const paidQty = lineItems.reduce((n, i) => n + i.qty, 0);
+  const mysteryCount = Math.floor(paidQty / MYSTERY_EVERY);
+  if (mysteryCount > 0) {
+    lineItems.push({
+      productId: MYSTERY_PRODUCT_ID,
+      name: MYSTERY_NAME,
+      size: "",
+      qty: mysteryCount,
+      price: 0,
+    });
   }
 
   const reference = makeReference();
