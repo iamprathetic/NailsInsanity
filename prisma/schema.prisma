@@ -25,6 +25,9 @@ model Product {
   stock       Int      @default(0)
   active      Boolean  @default(true)
   featured    Boolean  @default(false)
+  // Manual order within a collection (lower shows first). The homepage shows
+  // the first few of each collection by this order.
+  sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

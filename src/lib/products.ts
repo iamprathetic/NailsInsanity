@@ -14,6 +14,7 @@ export type ProductView = {
   stock: number;
   active: boolean;
   featured: boolean;
+  sortOrder: number;
   collectionId: string | null;
 };
 
@@ -28,6 +29,7 @@ type ProductRow = {
   stock: number;
   active: boolean;
   featured: boolean;
+  sortOrder: number;
   collectionId: string | null;
 };
 
@@ -43,6 +45,7 @@ export function toProductView(row: ProductRow): ProductView {
     stock: row.stock,
     active: row.active,
     featured: row.featured,
+    sortOrder: row.sortOrder,
     collectionId: row.collectionId,
   };
 }

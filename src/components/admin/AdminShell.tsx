@@ -7,6 +7,7 @@ import { Logo } from "@/components/Logo";
 const links = [
   { label: "Dashboard", href: "/admin" },
   { label: "Products", href: "/admin/products" },
+  { label: "Collections", href: "/admin/collections" },
   { label: "Orders", href: "/admin/orders" },
 ];
 

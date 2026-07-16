@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
 import { getHomeSections } from "@/lib/collections";
 import type { ProductView } from "@/lib/products";
@@ -50,6 +51,7 @@ export default async function HomePage() {
               eyebrow="Collection"
               title={c.name}
               products={c.products}
+              href={`/collection/${c.slug}`}
             />
           ))}
           {uncategorized.length > 0 && (
@@ -57,6 +59,7 @@ export default async function HomePage() {
               eyebrow="The Collection"
               title={collections.length ? "More designs" : "Latest designs"}
               products={uncategorized}
+              href="/shop"
             />
           )}
         </>
@@ -81,21 +84,53 @@ function ProductSection({
   eyebrow,
   title,
   products,
+  href,
 }: {
   eyebrow: string;
   title: string;
   products: ProductView[];
+  href: string;
 }) {
+  // Card width per breakpoint — items scroll horizontally with snap.
+  const cardWidth = "w-[46%] shrink-0 snap-start sm:w-[31%] lg:w-[23%]";
+  // Show the first 5 (owner-ordered) on the homepage; the rest live behind
+  // the "View all" collection page.
+  const preview = products.slice(0, 5);
+
   return (
     <section className="mx-auto max-w-6xl px-5 pt-8 pb-14">
-      <div>
-        <p className="eyebrow text-royal">{eyebrow}</p>
-        <h2 className="mt-2 text-4xl text-navy">{title}</h2>
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow text-royal">{eyebrow}</p>
+          <h2 className="mt-2 text-4xl text-navy">{title}</h2>
+        </div>
+        <Link
+          href={href}
+          className="hidden shrink-0 text-sm font-medium text-navy hover:text-royal sm:inline-flex"
+        >
+          View all →
+        </Link>
       </div>
-      <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-9 lg:grid-cols-4">
-        {products.map((p) => (
-          <ProductCard key={p.id} product={p} />
+
+      {/* Horizontal scroller (scrollbar hidden) */}
+      <div className="no-scrollbar mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-1">
+        {preview.map((p) => (
+          <div key={p.id} className={cardWidth}>
+            <ProductCard product={p} />
+          </div>
         ))}
+
+        {/* View all card at the end of the strip */}
+        <Link
+          href={href}
+          className={`group ${cardWidth}`}
+          aria-label={`View all ${title}`}
+        >
+          <div className="flex aspect-[4/5] flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-mist/40 text-navy transition-colors group-hover:border-navy group-hover:text-royal">
+            <span className="text-3xl leading-none">→</span>
+            <span className="mt-2 text-sm font-medium">View all</span>
+          </div>
+        </Link>
       </div>
     </section>
   );

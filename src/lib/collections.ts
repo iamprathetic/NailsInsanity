@@ -21,7 +21,7 @@ export async function getHomeSections(): Promise<{
       include: {
         products: {
           where: { active: true },
-          orderBy: { createdAt: "desc" },
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
         },
       },
     }),
@@ -56,6 +56,20 @@ export async function getCollections(): Promise<CollectionOption[]> {
     orderBy: { name: "asc" },
   });
   return rows.map((c) => ({ id: c.id, name: c.name, slug: c.slug }));
+}
+
+// One collection with its active products, for the collection page.
+export async function getCollectionBySlug(
+  slug: string
+): Promise<{ name: string; slug: string; products: ProductView[] } | null> {
+  const c = await prisma.collection.findUnique({
+    where: { slug },
+    include: {
+      products: { where: { active: true }, orderBy: { createdAt: "desc" } },
+    },
+  });
+  if (!c) return null;
+  return { name: c.name, slug: c.slug, products: c.products.map(toProductView) };
 }
 
 // Given what the product form submitted, return the collection id to store on
