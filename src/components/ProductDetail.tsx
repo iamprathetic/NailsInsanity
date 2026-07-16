@@ -76,7 +76,7 @@ export function ProductDetail({ product }: { product: ProductView }) {
         </div>
 
         {product.images.length > 1 && (
-          <div className="mt-4 flex gap-3">
+          <div className="mt-4 flex flex-wrap gap-3">
             {product.images.map((img, i) => (
               <button
                 key={i}
