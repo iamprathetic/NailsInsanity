@@ -103,12 +103,6 @@ export function ProductDetail({ product }: { product: ProductView }) {
         <h1 className="text-4xl text-navy md:text-5xl">{product.name}</h1>
         <p className="mt-3 text-2xl text-royal">{formatPrice(product.price)}</p>
 
-        {product.description && (
-          <p className="mt-6 whitespace-pre-line text-[15px] leading-relaxed text-ink/70">
-            {product.description}
-          </p>
-        )}
-
         {/* Size selector */}
         {needsSize && (
           <div className="mt-8">
@@ -178,6 +172,12 @@ export function ProductDetail({ product }: { product: ProductView }) {
             Buy now
           </Button>
         </div>
+
+        {product.description && (
+          <p className="mt-8 whitespace-pre-line text-[15px] leading-relaxed text-ink/70">
+            {product.description}
+          </p>
+        )}
 
         <ul className="mt-8 space-y-2 border-t border-line pt-6 text-sm text-ink/60">
           <li>✓ Hand-painted with precision</li>
