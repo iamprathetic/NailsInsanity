@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     template: `%s — ${site.name}`,
   },
   description:
-    "Nails Insanity — hand painted press on nails. Reusable, salon-quality nail art delivered across India.",
+    "Nails Insanity",
 };
 
 export default function RootLayout({
