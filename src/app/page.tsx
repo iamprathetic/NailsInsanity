@@ -51,7 +51,7 @@ export default async function HomePage() {
               eyebrow="Collection"
               title={c.name}
               products={c.products}
-              href={`/collection/${c.slug}`}
+              href={`/collections/${c.slug}`}
             />
           ))}
           {uncategorized.length > 0 && (

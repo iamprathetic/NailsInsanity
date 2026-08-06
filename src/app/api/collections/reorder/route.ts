@@ -40,20 +40,4 @@ export async function PATCH(req: Request) {
         prisma.product.update({ where: { id }, data: { sortOrder: index } })
       )
   );
-
-  return NextResponse.json({ ok: true });
-}
-export async function GET() {
-  const collections = await prisma.collection.findMany({
-    orderBy: {
-      name: "asc",
-    },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-    },
-  });
-
-  return NextResponse.json(collections);
 }
