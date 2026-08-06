@@ -5,14 +5,23 @@ import Image from "next/image";
 import { useCart } from "@/components/CartProvider";
 import { formatPrice } from "@/lib/format";
 import { ButtonLink } from "@/components/Button";
+import { useEffect } from "react";
 
 export default function CartPage() {
-  const { items, total, setQty, removeItem, mysteryCount } = useCart();
+  const { items, total, setQty, removeItem, mysteryCount, refreshCartStock, stockUpdated, } = useCart();
+
+  useEffect(() => {
+    refreshCartStock();
+  }, [refreshCartStock]);
 
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-2xl px-5 py-24 text-center">
         <h1 className="text-4xl text-navy">Your cart is empty</h1>
+        {stockUpdated && (
+        <div className="mt-5 rounded-xl border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-900">
+        Some quantities were automatically updated because the available stock changed.
+        </div>)}
         <p className="mt-3 text-sm text-ink/60">
           Looks like you haven&rsquo;t added anything yet.
         </p>
@@ -72,6 +81,7 @@ export default function CartPage() {
                 </div>
 
                 <div className="mt-auto flex items-center justify-between pt-3">
+                <div>
                   <div className="inline-flex items-center rounded-full border border-navy/20">
                     <button
                       onClick={() =>
@@ -87,12 +97,17 @@ export default function CartPage() {
                       onClick={() =>
                         setQty(item.productId, item.size, item.qty + 1)
                       }
-                      className="px-3 py-1.5 text-navy hover:text-royal"
+                      disabled={item.qty >= item.stock}
+                      className={`px-3 py-1.5 transition ${item.qty >= item.stock ? "cursor-not-allowed text-gray-300" : "text-navy hover:text-royal"}`}
                       aria-label="Increase"
                     >
                       +
                     </button>
                   </div>
+                  <p className="mt-2 text-xs text-ink/60">
+                    {item.stock} item{item.stock !== 1 ? "s" : ""} available
+                  </p>
+                </div>
                   <button
                     onClick={() => removeItem(item.productId, item.size)}
                     className="text-xs text-ink/50 underline hover:text-red-600"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { ProductView } from "@/lib/products";
@@ -20,8 +20,53 @@ export function ProductDetail({ product }: { product: ProductView }) {
   const [added, setAdded] = useState(false);
   const [error, setError] = useState("");
 
-  const soldOut = product.stock <= 0;
+  const [liveStock, setLiveStock] = useState(product.stock);
+  const soldOut = liveStock <= 0;
   const needsSize = product.sizes.length > 0;
+  const refreshStock = useCallback(async () =>  {
+    try {
+      const res = await fetch(`/api/products/${product.id}/stock`);
+
+      if (!res.ok) return;
+
+      const latest = await res.json();
+
+      setLiveStock(latest.stock);
+    } catch {
+    // Ignore network errors
+    }
+  }, [product.id]);
+  useEffect(() => {
+     refreshStock();
+
+     const interval = setInterval(refreshStock, 60000);
+
+     return () => clearInterval(interval);
+   }, [refreshStock]);
+
+  useEffect(() => {
+    function handleVisibility() {
+      if (document.visibilityState === "visible") {
+        refreshStock();
+      }
+    }
+
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibility
+    );
+
+    return () =>
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibility
+      );
+   }, [refreshStock]);
+  useEffect(() => {
+    if (qty > liveStock) {
+      setQty(liveStock === 0 ? 1 : liveStock);
+    }
+   }, [liveStock]);
 
   function handleAdd(buyNow: boolean) {
     if (needsSize && !size) {
@@ -36,6 +81,7 @@ export function ProductDetail({ product }: { product: ProductView }) {
       price: product.price,
       size: needsSize ? size : "",
       qty,
+      stock: liveStock,
       image: product.images[0] ?? "",
     });
     if (buyNow) {
@@ -141,14 +187,20 @@ export function ProductDetail({ product }: { product: ProductView }) {
             </button>
             <span className="w-8 text-center text-sm">{qty}</span>
             <button
-              onClick={() => setQty((q) => q + 1)}
-              className="px-4 py-2 text-lg text-navy hover:text-royal"
+              onClick={() => setQty((q) => Math.min (q + 1, liveStock))}
+              disabled={qty >= liveStock}
+              className={`px-4 py-2 text-lg transition ${qty >= liveStock ? "cursor-not-allowed text-gray-300" : "text-navy hover:text-royal"}`}
               aria-label="Increase quantity"
             >
               +
             </button>
           </div>
         </div>
+        {liveStock !== product.stock && (
+          <p className="mt-3 text-sm text-orange-600">
+            Stock has been updated.
+          </p>
+        )}
 
         {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
@@ -171,6 +223,7 @@ export function ProductDetail({ product }: { product: ProductView }) {
           >
             Buy now
           </Button>
+          {soldOut && (<p className="mt-4 text-sm font-medium text-red-600">This product is currently out of stock.</p>)}
         </div>
 
         {product.description && (
