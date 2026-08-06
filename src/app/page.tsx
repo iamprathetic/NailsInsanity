@@ -14,16 +14,16 @@ export default async function HomePage() {
     <>
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-gradient-to-b from-mist to-white">
-        <div className="mx-auto max-w-6xl px-5 pt-24 pb-12 text-center md:pt-32 md:pb-16">
+        <div className="mx-auto max-w-6xl px-5 pt-16 pb-8 text-center md:pt-20 md:pb-10">
           <p className="eyebrow animate-fade-up text-royal">
             Hand Painted Press On Nails
           </p>
-          <h1 className="animate-fade-up mx-auto mt-5 max-w-3xl text-5xl leading-[1.05] text-navy md:text-7xl">
+          <h1 className="animate-fade-up mx-auto mt-4 max-w-3xl text-5xl leading-[1.05] text-navy md:text-7xl">
             Made for
             <br />
             <span className="italic text-royal">modern women.</span>
           </h1>
-          <p className="animate-fade-up mx-auto mt-6 max-w-xl text-base leading-relaxed text-ink/70 md:text-lg">
+          <p className="animate-fade-up mx-auto mt-4 max-w-xl text-base leading-relaxed text-ink/70 md:text-lg">
             Hand-painted reusable press-on nails for women who value quality,
             convenience, and flexibility.
           </p>
@@ -98,7 +98,7 @@ function ProductSection({
   const preview = products.slice(0, 5);
 
   return (
-    <section className="mx-auto max-w-6xl px-5 pt-8 pb-14">
+    <section className="mx-auto max-w-6xl px-5 pt-3 pb-14">
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="eyebrow text-royal">{eyebrow}</p>

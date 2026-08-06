@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { nav } from "@/lib/site";
 import { useCart } from "@/components/CartProvider";
 import { Logo } from "@/components/Logo";
@@ -11,6 +11,25 @@ export function Nav() {
   const pathname = usePathname();
   const { count } = useCart();
   const [open, setOpen] = useState(false);
+  const [collections, setCollections] = useState<
+    { id: string; name: string; slug: string }[]
+  >([]);
+  const [collectionsOpen, setCollectionsOpen] = useState(false);
+
+  useEffect(() => {
+    async function loadCollections() {
+      try {
+        const res = await fetch("/api/collections");
+        if (!res.ok) return;
+        const data = await res.json();
+        setCollections(data);
+      } catch {
+        // Ignore network errors
+      }
+    }
+
+    loadCollections();
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-white/90 backdrop-blur-md">
@@ -35,6 +54,46 @@ export function Nav() {
               </Link>
             );
           })}
+          {/* Collections */}
+          <div
+            className="relative"
+            onMouseEnter={() => setCollectionsOpen(true)}
+            onMouseLeave={() => setCollectionsOpen(false)}
+          >
+            <button className="flex items-center gap-1 text-sm tracking-wide text-ink/70 transition-colors hover:text-royal">
+              Collections
+              <svg
+                className={`h-4 w-4 transition-transform ${
+                  collectionsOpen ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M6 9l6 6 6-6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+
+            {collectionsOpen && (
+              <div className="absolute left-0 mt-3 w-60 rounded-2xl border border-line bg-white shadow-xl">
+                {collections.map((collection) => (
+                  <Link
+                    key={collection.id}
+                    href={`/collections/${collection.slug}`}
+                    className="block px-5 py-3 text-sm text-ink hover:bg-mist"
+                  >
+                    {collection.name}
+                  </Link>
+                ))}
+                -
+              </div>
+            )}
+          </div>
           <CartLink count={count} />
         </nav>
 
@@ -70,6 +129,22 @@ export function Nav() {
               {item.label}
             </Link>
           ))}
+          <div className="border-t border-line">
+            <p className="px-5 pt-4 pb-2 text-xs font-semibold uppercase tracking-wider text-ink/50">
+              Collections
+            </p>
+
+            {collections.map((collection) => (
+              <Link
+                key={collection.id}
+                href={`/collections/${collection.slug}`}
+                onClick={() => setOpen(false)}
+                className="block px-8 py-3 text-sm text-ink/80 hover:bg-mist"
+              >
+                {collection.name}
+              </Link>
+            ))}
+          </div>
         </nav>
       )}
     </header>

@@ -95,3 +95,15 @@ export async function resolveCollectionId(input: {
   if (input.collectionId) return input.collectionId;
   return null;
 }
+export async function getAllCollections() {
+  return prisma.collection.findMany({
+    orderBy: {
+      name: "asc",
+    },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+    },
+  });
+}
