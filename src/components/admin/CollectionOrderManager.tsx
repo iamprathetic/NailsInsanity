@@ -3,6 +3,7 @@
 import { Fragment, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 
 type Item = { id: string; name: string; image: string };
 
@@ -71,9 +72,10 @@ export function CollectionOrderManager({
                 <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-mist">
                   {it.image ? (
                     <Image
-                      src={it.image}
+                      src={cloudinaryUrl(it.image, 100)}
                       alt=""
                       fill
+                      unoptimized
                       sizes="40px"
                       className="object-cover"
                     />

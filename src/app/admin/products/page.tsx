@@ -3,6 +3,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { toProductView } from "@/lib/products";
 import { formatPrice } from "@/lib/format";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { DeleteProductButton } from "@/components/admin/DeleteProductButton";
 
@@ -64,9 +65,10 @@ export default async function AdminProductsPage() {
                       <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-mist">
                         {p.images[0] ? (
                           <Image
-                            src={p.images[0]}
+                            src={cloudinaryUrl(p.images[0], 100)}
                             alt=""
                             fill
+                            unoptimized
                             sizes="44px"
                             className="object-cover"
                           />

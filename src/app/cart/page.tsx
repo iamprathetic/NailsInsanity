@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useCart } from "@/components/CartProvider";
 import { formatPrice } from "@/lib/format";
 import { ButtonLink } from "@/components/Button";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 import { useEffect } from "react";
 
 export default function CartPage() {
@@ -53,9 +54,10 @@ export default function CartPage() {
               >
                 {item.image ? (
                   <Image
-                    src={item.image}
+                    src={cloudinaryUrl(item.image, 200)}
                     alt={item.name}
                     fill
+                    unoptimized
                     sizes="96px"
                     className="object-cover"
                   />

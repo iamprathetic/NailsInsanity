@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { formatPrice } from "@/lib/format";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 import type { ProductView } from "@/lib/products";
 
 export function ProductCard({ product }: { product: ProductView }) {
@@ -12,9 +13,10 @@ export function ProductCard({ product }: { product: ProductView }) {
       <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-mist">
         {image ? (
           <Image
-            src={image}
+            src={cloudinaryUrl(image, 800)}
             alt={product.name}
             fill
+            unoptimized
             sizes="(min-width: 1024px) 25vw, 50vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />

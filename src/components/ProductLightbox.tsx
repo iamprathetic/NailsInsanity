@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 
 // Full-screen image viewer with click/tap-to-zoom. Point (or drag on touch) to
 // pan around while zoomed. Arrows / swipe to move between images, Esc to close.
@@ -117,9 +118,10 @@ export function ProductLightbox({
         onClick={(e) => e.stopPropagation()}
       >
         <Image
-          src={images[index]}
+          src={cloudinaryUrl(images[index], 2000)}
           alt={alt}
           fill
+          unoptimized
           sizes="92vw"
           className={`select-none object-contain transition-transform duration-200 ${
             zoom ? "scale-[2.5] cursor-zoom-out" : "cursor-zoom-in"

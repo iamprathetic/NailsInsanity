@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/format";
 import { useCart } from "@/components/CartProvider";
 import { Button } from "@/components/Button";
 import { ProductLightbox } from "@/components/ProductLightbox";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 
 export function ProductDetail({ product }: { product: ProductView }) {
   const router = useRouter();
@@ -110,9 +111,10 @@ export function ProductDetail({ product }: { product: ProductView }) {
           {product.images[activeImage] ? (
             <>
               <Image
-                src={product.images[activeImage]}
+                src={cloudinaryUrl(product.images[activeImage], 1600)}
                 alt={product.name}
                 fill
+                unoptimized
                 priority
                 sizes="(min-width: 768px) 50vw, 100vw"
                 className="object-cover"
@@ -151,9 +153,10 @@ export function ProductDetail({ product }: { product: ProductView }) {
                 }`}
               >
                 <Image
-                  src={img}
+                  src={cloudinaryUrl(img, 160)}
                   alt={`${product.name} ${i + 1}`}
                   fill
+                  unoptimized
                   sizes="80px"
                   className="object-cover"
                 />
