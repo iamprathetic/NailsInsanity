@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/components/CartProvider";
 import { formatPrice } from "@/lib/format";
+import { shippingMethods, shippingFeeFor } from "@/lib/site";
 import { Button } from "@/components/Button";
 import { ButtonLink } from "@/components/Button";
+import { BestSellers } from "@/components/BestSellers";
 
 type RazorpayResponse = {
   razorpay_order_id: string;
@@ -44,10 +46,24 @@ const emptyForm = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, total, clear, mysteryCount } = useCart();
+  const { items, total, count, clear, mysteryCount } = useCart();
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [shippingMethod, setShippingMethod] = useState<string>("free");
+  const [couponInput, setCouponInput] = useState("");
+  const [applied, setApplied] = useState<{ code: string; discount: number } | null>(
+    null
+  );
+  const [couponMsg, setCouponMsg] = useState("");
+  const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+
+  const subtotal = total;
+  const shippingFee = shippingFeeFor(shippingMethod);
+  const discount = applied?.discount ?? 0;
+  const grandTotal = Math.max(0, subtotal - discount) + shippingFee;
 
   if (items.length === 0) {
     return (
@@ -67,13 +83,45 @@ export default function CheckoutPage() {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
+  async function applyCoupon() {
+    setCouponError("");
+    setCouponMsg("");
+    if (!couponInput.trim()) return setCouponError("Enter a coupon code.");
+    setCouponLoading(true);
+    try {
+      const res = await fetch("/api/coupon/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponInput, qty: count, subtotal }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setApplied({ code: data.code, discount: data.discount });
+        setCouponMsg(data.message);
+      } else {
+        setApplied(null);
+        setCouponError(data.message || "Invalid coupon.");
+      }
+    } catch {
+      setCouponError("Could not check that coupon. Try again.");
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
+  function removeCoupon() {
+    setApplied(null);
+    setCouponInput("");
+    setCouponMsg("");
+    setCouponError("");
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      // 1. Create the order server-side (prices/total are recomputed from the DB).
       const createRes = await fetch("/api/checkout/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -84,6 +132,8 @@ export default function CheckoutPage() {
             size: i.size,
             qty: i.qty,
           })),
+          shippingMethod,
+          couponCode: applied?.code ?? null,
         }),
       });
 
@@ -94,7 +144,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 2a. Demo mode (no Razorpay keys configured yet) — confirm directly.
+      // Demo mode (no Razorpay keys yet) — confirm directly.
       if (data.demo) {
         const verifyRes = await fetch("/api/checkout/verify", {
           method: "POST",
@@ -111,7 +161,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 2b. Real Razorpay checkout.
+      // Real Razorpay checkout.
       const ok = await loadRazorpayScript();
       if (!ok || !window.Razorpay) {
         setError("Could not load the payment gateway. Please try again.");
@@ -122,7 +172,7 @@ export default function CheckoutPage() {
       const rzp = new window.Razorpay({
         key: data.keyId,
         order_id: data.razorpayOrderId,
-        amount: data.amount * 100, // paise
+        amount: data.amount * 100,
         currency: "INR",
         name: "Nails Insanity",
         description: `Order ${data.reference}`,
@@ -163,10 +213,10 @@ export default function CheckoutPage() {
     "w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink outline-none transition-colors focus:border-navy";
 
   return (
-    <div className="mx-auto max-w-5xl px-5 py-14">
+    <div className="mx-auto max-w-5xl px-5 py-12">
       <h1 className="text-4xl text-navy">Checkout</h1>
 
-      <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_20rem]">
+      <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_22rem]">
         {/* Details form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <h2 className="font-display text-xl text-navy">Shipping details</h2>
@@ -246,10 +296,40 @@ export default function CheckoutPage() {
             </div>
           </div>
 
+          {/* Shipping method */}
+          <div className="pt-2">
+            <h2 className="font-display text-xl text-navy">Shipping method</h2>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {shippingMethods.map((m) => {
+                const selected = shippingMethod === m.id;
+                return (
+                  <button
+                    type="button"
+                    key={m.id}
+                    onClick={() => setShippingMethod(m.id)}
+                    className={`rounded-2xl border p-4 text-left transition-colors ${
+                      selected
+                        ? "border-navy bg-navy/5"
+                        : "border-line hover:border-navy/40"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-navy">{m.label}</span>
+                      <span className="text-sm font-medium text-navy">
+                        {m.fee === 0 ? "Free" : formatPrice(m.fee)}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-ink/60">{m.eta}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {error && <p className="text-sm text-red-600">{error}</p>}
 
           <Button type="submit" size="lg" disabled={loading} className="w-full">
-            {loading ? "Processing…" : `Pay ${formatPrice(total)}`}
+            {loading ? "Processing…" : `Pay ${formatPrice(grandTotal)}`}
           </Button>
         </form>
 
@@ -271,25 +351,81 @@ export default function CheckoutPage() {
             ))}
             {mysteryCount > 0 && (
               <li className="flex justify-between gap-3 text-sm">
-                <span className="text-ink/70">
-                  🎁 Mystery Set × {mysteryCount}
-                </span>
+                <span className="text-ink/70">🎁 Mystery Set × {mysteryCount}</span>
                 <span className="text-green-700">FREE</span>
               </li>
             )}
           </ul>
+
+          {/* Coupon */}
+          <div className="mt-5 border-t border-line pt-4">
+            {applied ? (
+              <div className="flex items-center justify-between gap-2 rounded-xl bg-green-50 px-3 py-2">
+                <span className="text-sm text-green-700">
+                  Coupon <strong>{applied.code}</strong> applied
+                </span>
+                <button
+                  type="button"
+                  onClick={removeCoupon}
+                  className="text-xs text-ink/50 hover:text-red-600"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm uppercase text-ink outline-none focus:border-navy"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  placeholder="Coupon code"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={applyCoupon}
+                  disabled={couponLoading}
+                >
+                  {couponLoading ? "…" : "Apply"}
+                </Button>
+              </div>
+            )}
+            {couponMsg && !applied && (
+              <p className="mt-2 text-xs text-green-700">{couponMsg}</p>
+            )}
+            {couponError && (
+              <p className="mt-2 text-xs text-red-600">{couponError}</p>
+            )}
+          </div>
+
+          {/* Totals */}
           <dl className="mt-5 space-y-3 border-t border-line pt-4 text-sm">
             <div className="flex justify-between">
-              <dt className="text-ink/60">Shipping</dt>
-              <dd className="text-green-700">Free</dd>
+              <dt className="text-ink/60">Subtotal</dt>
+              <dd className="text-navy">{formatPrice(subtotal)}</dd>
             </div>
-            <div className="flex justify-between text-base font-semibold">
+            {discount > 0 && (
+              <div className="flex justify-between">
+                <dt className="text-ink/60">Discount</dt>
+                <dd className="text-green-700">−{formatPrice(discount)}</dd>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <dt className="text-ink/60">Shipping</dt>
+              <dd className={shippingFee === 0 ? "text-green-700" : "text-navy"}>
+                {shippingFee === 0 ? "Free" : formatPrice(shippingFee)}
+              </dd>
+            </div>
+            <div className="flex justify-between border-t border-line pt-3 text-base font-semibold">
               <dt className="text-navy">Total</dt>
-              <dd className="text-navy">{formatPrice(total)}</dd>
+              <dd className="text-navy">{formatPrice(grandTotal)}</dd>
             </div>
           </dl>
         </aside>
       </div>
+
+      <BestSellers />
     </div>
   );
 }

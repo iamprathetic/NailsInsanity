@@ -34,3 +34,27 @@ export const footerPolicies = [
   { label: "Shipping & Return", href: "/shipping-return" },
   { label: "Contact Us", href: "/contact" },
 ] as const;
+
+// Shipping methods offered at checkout. `fee` is in whole rupees.
+// Change the express `fee` here to update it everywhere.
+export const shippingMethods = [
+  {
+    id: "free",
+    label: "Free shipping",
+    eta: "Ships within 7–14 days",
+    fee: 0,
+  },
+  {
+    id: "express",
+    label: "Express shipping",
+    eta: "Ships within 2–4 days",
+    fee: 300,
+  },
+] as const;
+
+export type ShippingMethodId = (typeof shippingMethods)[number]["id"];
+
+// Server-safe lookup of a shipping fee (defaults to free / 0).
+export function shippingFeeFor(id: string): number {
+  return shippingMethods.find((m) => m.id === id)?.fee ?? 0;
+}

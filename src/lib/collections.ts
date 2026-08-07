@@ -65,10 +65,34 @@ export async function getCollectionBySlug(
   const c = await prisma.collection.findUnique({
     where: { slug },
     include: {
-      products: { where: { active: true }, orderBy: { createdAt: "desc" } },
+      products: {
+        where: { active: true },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      },
     },
   });
   if (!c) return null;
+  return { name: c.name, slug: c.slug, products: c.products.map(toProductView) };
+}
+
+// Other active products in the same collection as the given product (excluding
+// itself), for the "More from this collection" section on a product page.
+export async function getRelatedForProduct(
+  productId: string,
+  collectionId: string | null
+): Promise<{ name: string; slug: string; products: ProductView[] } | null> {
+  if (!collectionId) return null;
+  const c = await prisma.collection.findUnique({
+    where: { id: collectionId },
+    include: {
+      products: {
+        where: { active: true, id: { not: productId } },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+        take: 12,
+      },
+    },
+  });
+  if (!c || c.products.length === 0) return null;
   return { name: c.name, slug: c.slug, products: c.products.map(toProductView) };
 }
 

@@ -44,6 +44,7 @@ export default async function EditProductPage({
             stock: p.stock,
             active: p.active,
             featured: p.featured,
+            bestSeller: p.bestSeller,
             collectionId: p.collectionId,
           }}
         />

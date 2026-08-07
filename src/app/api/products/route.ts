@@ -44,6 +44,7 @@ export async function POST(req: Request) {
       stock: data.stock,
       active: data.active,
       featured: data.featured,
+      bestSeller: data.bestSeller,
       collectionId,
     },
   });

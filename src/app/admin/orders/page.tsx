@@ -72,6 +72,11 @@ export default async function AdminOrdersPage() {
                         </li>
                       ))}
                     </ul>
+                    {o.discount > 0 && (
+                      <p className="mt-2 text-xs text-green-700">
+                        Coupon {o.couponCode}: −{formatPrice(o.discount)}
+                      </p>
+                    )}
                   </div>
 
                   {/* Customer */}
@@ -83,6 +88,11 @@ export default async function AdminOrdersPage() {
                       <p>{o.email}</p>
                       <p className="mt-1">
                         {o.address}, {o.city}, {o.state} - {o.pincode}
+                      </p>
+                      <p className="mt-1 font-medium text-navy">
+                        {o.shippingMethod === "express"
+                          ? "🚀 Express shipping (2–4 days)"
+                          : "Free shipping (7–14 days)"}
                       </p>
                     </div>
                   </div>

@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/auth";
-import { productInputSchema } from "@/lib/validation";
-import { resolveCollectionId } from "@/lib/collections";
+import { couponInputSchema } from "@/lib/validation";
 
-// Update a product (admin only).
+function parseExpiry(value?: string | null): Date | null {
+  if (!value) return null;
+  const d = new Date(`${value}T23:59:59`);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+// Update a coupon (admin only).
 export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -13,8 +18,7 @@ export async function PUT(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { id } = await params;
-
-  const existing = await prisma.product.findUnique({ where: { id } });
+  const existing = await prisma.coupon.findUnique({ where: { id } });
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -26,7 +30,7 @@ export async function PUT(
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const parsed = productInputSchema.safeParse(body);
+  const parsed = couponInputSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? "Invalid input" },
@@ -34,32 +38,33 @@ export async function PUT(
     );
   }
   const data = parsed.data;
+  const code = data.code.toUpperCase();
 
-  const collectionId = await resolveCollectionId({
-    collectionId: data.collectionId,
-    newCollectionName: data.newCollectionName,
-  });
+  // Guard against changing to a code that another coupon already uses.
+  const clash = await prisma.coupon.findUnique({ where: { code } });
+  if (clash && clash.id !== id) {
+    return NextResponse.json(
+      { error: "A coupon with that code already exists." },
+      { status: 400 }
+    );
+  }
 
-  await prisma.product.update({
+  await prisma.coupon.update({
     where: { id },
     data: {
-      name: data.name,
-      description: data.description,
-      price: data.price,
-      sizes: JSON.stringify(data.sizes),
-      images: JSON.stringify(data.images),
-      stock: data.stock,
+      code,
+      type: data.type,
+      value: data.value,
+      minSets: data.minSets,
+      expiresAt: parseExpiry(data.expiresAt),
       active: data.active,
-      featured: data.featured,
-      bestSeller: data.bestSeller,
-      collectionId,
     },
   });
 
   return NextResponse.json({ ok: true });
 }
 
-// Delete a product (admin only).
+// Delete a coupon (admin only).
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -68,12 +73,10 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { id } = await params;
-
   try {
-    await prisma.product.delete({ where: { id } });
+    await prisma.coupon.delete({ where: { id } });
   } catch {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
-
   return NextResponse.json({ ok: true });
 }

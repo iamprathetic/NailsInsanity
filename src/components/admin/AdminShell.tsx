@@ -8,6 +8,7 @@ const links = [
   { label: "Dashboard", href: "/admin" },
   { label: "Products", href: "/admin/products" },
   { label: "Collections", href: "/admin/collections" },
+  { label: "Coupons", href: "/admin/coupons" },
   { label: "Orders", href: "/admin/orders" },
 ];
 
@@ -59,8 +60,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Main */}
-      <div className="flex-1">
+      {/* Main (min-w-0 lets the column shrink so wide content scrolls
+          instead of pushing the whole page sideways on mobile) */}
+      <div className="min-w-0 flex-1">
         {/* Mobile top bar */}
         <div className="flex items-center justify-between border-b border-line bg-white px-5 py-4 md:hidden">
           <Logo compact />
@@ -68,13 +70,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             Sign out
           </button>
         </div>
-        {/* Mobile nav */}
-        <nav className="flex gap-1 border-b border-line bg-white px-3 py-2 md:hidden">
+        {/* Mobile nav (scrolls horizontally if the tabs don't fit) */}
+        <nav className="no-scrollbar flex gap-1 overflow-x-auto whitespace-nowrap border-b border-line bg-white px-3 py-2 md:hidden">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className="rounded-lg px-3 py-1.5 text-sm text-ink/70"
+              className="shrink-0 rounded-lg px-3 py-1.5 text-sm text-ink/70"
             >
               {l.label}
             </Link>

@@ -51,7 +51,7 @@ export default async function HomePage() {
               eyebrow="Collection"
               title={c.name}
               products={c.products}
-              href={`/collections/${c.slug}`}
+              href={`/collection/${c.slug}`}
             />
           ))}
           {uncategorized.length > 0 && (
@@ -93,9 +93,9 @@ function ProductSection({
 }) {
   // Card width per breakpoint — items scroll horizontally with snap.
   const cardWidth = "w-[46%] shrink-0 snap-start sm:w-[31%] lg:w-[23%]";
-  // Show the first 5 (owner-ordered) on the homepage; the rest live behind
+  // Show the first 6 (owner-ordered) on the homepage; the rest live behind
   // the "View all" collection page.
-  const preview = products.slice(0, 5);
+  const preview = products.slice(0, 6);
 
   return (
     <section className="mx-auto max-w-6xl px-5 pt-3 pb-14">

@@ -12,10 +12,14 @@ import {
   MYSTERY_PRODUCT_ID,
   MYSTERY_NAME,
 } from "@/lib/mystery";
+import { shippingFeeFor } from "@/lib/site";
+import { evaluateCoupon } from "@/lib/coupon";
 
 const bodySchema = z.object({
   customer: customerSchema,
   items: z.array(checkoutItemSchema).min(1),
+  shippingMethod: z.string().optional(),
+  couponCode: z.string().optional().nullable(),
 });
 
 // Short, human-friendly order reference, e.g. NI-8F3K2A.
@@ -39,7 +43,7 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
-  const { customer, items } = parsed.data;
+  const { customer, items, shippingMethod, couponCode } = parsed.data;
 
   // Recompute everything from the database — never trust prices from the client.
   const ids = [...new Set(items.map((i) => i.productId))];
@@ -55,7 +59,7 @@ export async function POST(req: Request) {
     qty: number;
     price: number;
   }[] = [];
-  let total = 0;
+  let subtotal = 0;
 
   for (const item of items) {
     const product = byId.get(item.productId);
@@ -78,10 +82,10 @@ export async function POST(req: Request) {
       qty: item.qty,
       price: product.price,
     });
-    total += product.price * item.qty;
+    subtotal += product.price * item.qty;
   }
 
-  if (total <= 0) {
+  if (subtotal <= 0) {
     return NextResponse.json({ error: "Invalid order total." }, { status: 400 });
   }
 
@@ -100,6 +104,23 @@ export async function POST(req: Request) {
     });
   }
 
+  // Shipping fee for the chosen method (server-side).
+  const method = shippingMethod === "express" ? "express" : "free";
+  const shippingFee = shippingFeeFor(method);
+
+  // Re-validate the coupon against the authoritative subtotal + quantity, so a
+  // customer can't fake a discount by editing the request.
+  let discount = 0;
+  let appliedCoupon: string | null = null;
+  if (couponCode) {
+    const result = await evaluateCoupon(couponCode, paidQty, subtotal);
+    if (result.ok) {
+      discount = result.discount;
+      appliedCoupon = result.code;
+    }
+  }
+
+  const grandTotal = Math.max(0, subtotal - discount) + shippingFee;
   const reference = makeReference();
 
   // Persist the order in a pending state.
@@ -114,21 +135,25 @@ export async function POST(req: Request) {
       state: customer.state,
       pincode: customer.pincode,
       items: JSON.stringify(lineItems),
-      total,
+      shippingMethod: method,
+      shippingFee,
+      couponCode: appliedCoupon,
+      discount,
+      total: grandTotal,
       status: "pending",
     },
   });
 
   // Demo mode: no Razorpay keys yet — the client will confirm directly.
   if (!isRazorpayConfigured()) {
-    return NextResponse.json({ demo: true, reference, amount: total });
+    return NextResponse.json({ demo: true, reference, amount: grandTotal });
   }
 
   // Real payment: create a matching Razorpay order (amount in paise).
   try {
     const rzp = getRazorpayClient();
     const rzpOrder = await rzp.orders.create({
-      amount: total * 100,
+      amount: grandTotal * 100,
       currency: "INR",
       receipt: reference,
     });
@@ -140,7 +165,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       demo: false,
       reference,
-      amount: total,
+      amount: grandTotal,
       razorpayOrderId: rzpOrder.id,
       keyId: process.env.RAZORPAY_KEY_ID,
     });

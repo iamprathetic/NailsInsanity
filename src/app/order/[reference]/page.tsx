@@ -21,7 +21,7 @@ export default async function OrderPage({
   const items = parseJsonArray<LineItem>(order.items);
 
   return (
-    <div className="mx-auto max-w-2xl px-5 py-20 text-center">
+    <div className="mx-auto max-w-2xl px-5 py-14 text-center">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-700">
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
           <path
@@ -53,13 +53,35 @@ export default async function OrderPage({
             </li>
           ))}
         </ul>
-        <div className="mt-5 flex justify-between border-t border-line pt-4 text-base font-semibold">
-          <span className="text-navy">Total</span>
-          <span className="text-navy">{formatPrice(order.total)}</span>
-        </div>
+        <dl className="mt-5 space-y-2 border-t border-line pt-4 text-sm">
+          {order.discount > 0 && (
+            <div className="flex justify-between">
+              <dt className="text-ink/60">
+                Discount{order.couponCode ? ` (${order.couponCode})` : ""}
+              </dt>
+              <dd className="text-green-700">−{formatPrice(order.discount)}</dd>
+            </div>
+          )}
+          <div className="flex justify-between">
+            <dt className="text-ink/60">
+              Shipping
+              {order.shippingMethod === "express" ? " (Express)" : ""}
+            </dt>
+            <dd className={order.shippingFee === 0 ? "text-green-700" : "text-navy"}>
+              {order.shippingFee === 0 ? "Free" : formatPrice(order.shippingFee)}
+            </dd>
+          </div>
+          <div className="flex justify-between border-t border-line pt-2 text-base font-semibold">
+            <dt className="text-navy">Total</dt>
+            <dd className="text-navy">{formatPrice(order.total)}</dd>
+          </div>
+        </dl>
         <p className="mt-4 text-sm text-ink/60">
           Shipping to: {order.address}, {order.city}, {order.state} -{" "}
-          {order.pincode}
+          {order.pincode} ·{" "}
+          {order.shippingMethod === "express"
+            ? "Express (2–4 days)"
+            : "Free (7–14 days)"}
         </p>
       </div>
 

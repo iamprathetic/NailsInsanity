@@ -25,6 +25,8 @@ model Product {
   stock       Int      @default(0)
   active      Boolean  @default(true)
   featured    Boolean  @default(false)
+  // Shown in the "Best Sellers" strip on the checkout page.
+  bestSeller  Boolean  @default(false)
   // Manual order within a collection (lower shows first). The homepage shows
   // the first few of each collection by this order.
   sortOrder   Int      @default(0)
@@ -61,7 +63,13 @@ model Order {
   // JSON-encoded array of line items:
   // [{ productId, name, size, qty, price }]
   items             String
-  // Amount in whole rupees (INR)
+  // Shipping method chosen: "free" (7-14 days) or "express" (2-4 days)
+  shippingMethod    String   @default("free")
+  shippingFee       Int      @default(0)
+  // Coupon applied (if any) and the discount amount in rupees
+  couponCode        String?
+  discount          Int      @default(0)
+  // Final amount charged in whole rupees (INR): subtotal - discount + shipping
   total             Int
   // pending -> paid -> shipped -> delivered ; or cancelled
   status            String   @default("pending")
@@ -71,4 +79,19 @@ model Order {
   updatedAt         DateTime @updatedAt
 
   @@index([status])
+}
+
+model Coupon {
+  id        String    @id @default(cuid())
+  // Stored uppercase, e.g. "WELCOME10"
+  code      String    @unique
+  // "percent" (value = %) or "fixed" (value = rupees off)
+  type      String    @default("percent")
+  value     Int
+  // Minimum number of sets in the cart for the coupon to apply
+  minSets   Int       @default(0)
+  // Optional expiry; null = never expires
+  expiresAt DateTime?
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
 }

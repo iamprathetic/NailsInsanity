@@ -21,7 +21,7 @@ export default async function AdminCollectionsPage() {
       <h1 className="font-display text-3xl text-navy">Collections</h1>
       <p className="mt-1 max-w-2xl text-sm text-ink/60">
         Reorder each collection&rsquo;s products with the ↑ ↓ arrows. The first
-        <strong className="text-navy"> 5 </strong> appear on the homepage; the
+        <strong className="text-navy"> 6 </strong> appear on the homepage; the
         rest sit behind the &ldquo;View all&rdquo; link. Changes save
         automatically.
       </p>

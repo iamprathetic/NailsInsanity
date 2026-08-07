@@ -9,6 +9,7 @@ export const productInputSchema = z.object({
   stock: z.coerce.number().int().min(0).max(1_000_000).default(0),
   active: z.boolean().default(true),
   featured: z.boolean().default(false),
+  bestSeller: z.boolean().default(false),
   // Collection assignment: either an existing collection id, or a new
   // collection name to create. Both optional (product can have no collection).
   collectionId: z.string().trim().optional().nullable(),
@@ -16,6 +17,18 @@ export const productInputSchema = z.object({
 });
 
 export type ProductInput = z.infer<typeof productInputSchema>;
+
+export const couponInputSchema = z.object({
+  code: z.string().trim().min(1, "Code is required").max(40),
+  type: z.enum(["percent", "fixed"]),
+  value: z.coerce.number().int().min(1).max(1_000_000),
+  minSets: z.coerce.number().int().min(0).max(1000).default(0),
+  // "YYYY-MM-DD" from a date input, or empty/absent for no expiry.
+  expiresAt: z.string().trim().optional().nullable(),
+  active: z.boolean().default(true),
+});
+
+export type CouponInput = z.infer<typeof couponInputSchema>;
 
 export const customerSchema = z.object({
   customerName: z.string().trim().min(1).max(120),

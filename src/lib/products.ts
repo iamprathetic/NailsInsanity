@@ -14,6 +14,7 @@ export type ProductView = {
   stock: number;
   active: boolean;
   featured: boolean;
+  bestSeller: boolean;
   sortOrder: number;
   collectionId: string | null;
 };
@@ -29,6 +30,7 @@ type ProductRow = {
   stock: number;
   active: boolean;
   featured: boolean;
+  bestSeller: boolean;
   sortOrder: number;
   collectionId: string | null;
 };
@@ -45,6 +47,7 @@ export function toProductView(row: ProductRow): ProductView {
     stock: row.stock,
     active: row.active,
     featured: row.featured,
+    bestSeller: row.bestSeller,
     sortOrder: row.sortOrder,
     collectionId: row.collectionId,
   };
@@ -54,6 +57,16 @@ export async function getActiveProducts(): Promise<ProductView[]> {
   const rows = await prisma.product.findMany({
     where: { active: true },
     orderBy: { createdAt: "desc" },
+  });
+  return rows.map(toProductView);
+}
+
+// Products the owner flagged as best sellers — shown on the checkout page.
+export async function getBestSellers(limit = 12): Promise<ProductView[]> {
+  const rows = await prisma.product.findMany({
+    where: { active: true, bestSeller: true },
+    orderBy: { createdAt: "desc" },
+    take: limit,
   });
   return rows.map(toProductView);
 }

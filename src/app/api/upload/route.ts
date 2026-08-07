@@ -2,20 +2,17 @@ import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
-import { put } from "@vercel/blob";
 import { isAdmin } from "@/lib/auth";
+import { isCloudinaryConfigured, uploadToCloudinary } from "@/lib/cloudinary";
 
 // Handles product image uploads from the admin panel.
 //
-// PRODUCTION (Vercel): if BLOB_READ_WRITE_TOKEN is set, files are stored in
-// Vercel Blob (persistent, CDN-served). This is added automatically when you
-// create a Blob store in the Vercel dashboard.
-//
-// LOCAL DEV: with no Blob token, files are written to /public/uploads so the
-// admin panel works locally without any extra setup.
+// Images are stored in Cloudinary (set CLOUDINARY_* in the environment).
+// If Cloudinary isn't configured (e.g. a quick local run), images fall back to
+// /public/uploads so the admin still works in dev.
 
 const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 
 export async function POST(req: Request) {
   if (!(await isAdmin())) {
@@ -36,46 +33,42 @@ export async function POST(req: Request) {
   }
   if (file.size > MAX_BYTES) {
     return NextResponse.json(
-      { error: "Image must be under 5 MB" },
+      { error: "Image must be under 10 MB" },
       { status: 400 }
     );
   }
 
-  const ext = file.type.split("/")[1].replace("jpeg", "jpg");
-  const name = `${crypto.randomUUID()}.${ext}`;
-  const onVercel = Boolean(process.env.VERCEL);
+  const bytes = Buffer.from(await file.arrayBuffer());
 
-  // Production: store in Vercel Blob.
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  // Primary: Cloudinary.
+  if (isCloudinaryConfigured()) {
     try {
-      const blob = await put(`products/${name}`, file, {
-        access: "public",
-        contentType: file.type,
-      });
-      return NextResponse.json({ ok: true, url: blob.url });
+      const url = await uploadToCloudinary(bytes);
+      return NextResponse.json({ ok: true, url });
     } catch (err) {
-      console.error("Blob upload failed:", err);
+      console.error("Cloudinary upload failed:", err);
       return NextResponse.json(
-        { error: `Blob upload failed: ${(err as Error).message}` },
+        { error: `Image upload failed: ${(err as Error).message}` },
         { status: 500 }
       );
     }
   }
 
-  // On Vercel without a Blob token, local disk writes fail (read-only FS).
-  if (onVercel) {
+  // On Vercel without Cloudinary, local disk writes fail (read-only FS).
+  if (process.env.VERCEL) {
     return NextResponse.json(
       {
         error:
-          "Image storage isn't configured. Create a Blob store in Vercel, connect it to this project, and redeploy.",
+          "Image storage isn't configured. Add your CLOUDINARY_* keys in the environment settings.",
       },
       { status: 500 }
     );
   }
 
-  // Local dev: write to /public/uploads.
+  // Local dev fallback: write to /public/uploads.
   try {
-    const bytes = Buffer.from(await file.arrayBuffer());
+    const ext = file.type.split("/")[1].replace("jpeg", "jpg");
+    const name = `${crypto.randomUUID()}.${ext}`;
     const uploadDir = path.join(process.cwd(), "public", "uploads");
     await mkdir(uploadDir, { recursive: true });
     await writeFile(path.join(uploadDir, name), bytes);

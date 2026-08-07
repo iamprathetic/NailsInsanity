@@ -59,7 +59,7 @@ export function CollectionOrderManager({
         <ul>
           {items.map((it, i) => (
             <Fragment key={it.id}>
-              {i === 5 && (
+              {i === 6 && (
                 <li className="border-y border-dashed border-royal/30 bg-royal/5 px-5 py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-royal">
                   ↑ Shown on homepage &nbsp;·&nbsp; below hidden behind “View all” ↓
                 </li>

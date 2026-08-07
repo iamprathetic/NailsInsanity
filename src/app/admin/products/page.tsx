@@ -45,8 +45,8 @@ export default async function AdminProductsPage() {
           </Link>
         </div>
       ) : (
-        <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-white">
-          <table className="w-full text-sm">
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-line bg-white">
+          <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-ink/50">
                 <th className="px-5 py-3 font-medium">Product</th>
@@ -80,8 +80,8 @@ export default async function AdminProductsPage() {
                               {p.collectionName}
                             </span>
                           )}
-                          {p.featured && (
-                            <span className="text-royal">Featured</span>
+                          {p.bestSeller && (
+                            <span className="text-royal">★ Best seller</span>
                           )}
                         </div>
                       </div>

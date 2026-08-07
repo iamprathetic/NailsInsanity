@@ -113,6 +113,9 @@ export async function POST(req: Request) {
       price: i.price,
     })),
     total: order.total,
+    shippingMethod: order.shippingMethod,
+    discount: order.discount,
+    couponCode: order.couponCode,
   });
 
   return NextResponse.json({ ok: true });

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { nav } from "@/lib/site";
 import { useCart } from "@/components/CartProvider";
 import { Logo } from "@/components/Logo";
@@ -15,6 +15,8 @@ export function Nav() {
     { id: string; name: string; slug: string }[]
   >([]);
   const [collectionsOpen, setCollectionsOpen] = useState(false);
+  const [mobileCollectionsOpen, setMobileCollectionsOpen] = useState(false);
+  const collectionsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function loadCollections() {
@@ -30,6 +32,22 @@ export function Nav() {
 
     loadCollections();
   }, []);
+
+  // Close the desktop Collections dropdown when clicking/tapping outside it.
+  // Only listen while it's open, so it never interferes with opening.
+  useEffect(() => {
+    if (!collectionsOpen) return;
+    function onDocClick(e: MouseEvent) {
+      if (
+        collectionsRef.current &&
+        !collectionsRef.current.contains(e.target as Node)
+      ) {
+        setCollectionsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [collectionsOpen]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-white/90 backdrop-blur-md">
@@ -54,13 +72,15 @@ export function Nav() {
               </Link>
             );
           })}
-          {/* Collections */}
-          <div
-            className="relative"
-            onMouseEnter={() => setCollectionsOpen(true)}
-            onMouseLeave={() => setCollectionsOpen(false)}
-          >
-            <button className="flex items-center gap-1 text-sm tracking-wide text-ink/70 transition-colors hover:text-royal">
+
+          {/* Collections (click/tap to toggle — works on touch) */}
+          <div className="relative" ref={collectionsRef}>
+            <button
+              type="button"
+              onClick={() => setCollectionsOpen((v) => !v)}
+              aria-expanded={collectionsOpen}
+              className="flex items-center gap-1 text-sm tracking-wide text-ink/70 transition-colors hover:text-royal"
+            >
               Collections
               <svg
                 className={`h-4 w-4 transition-transform ${
@@ -79,21 +99,22 @@ export function Nav() {
               </svg>
             </button>
 
-            {collectionsOpen && (
-              <div className="absolute left-0 mt-3 w-60 rounded-2xl border border-line bg-white shadow-xl">
+            {collectionsOpen && collections.length > 0 && (
+              <div className="absolute left-0 mt-3 max-h-[70vh] w-60 overflow-y-auto rounded-2xl border border-line bg-white py-1 shadow-xl">
                 {collections.map((collection) => (
                   <Link
                     key={collection.id}
-                    href={`/collections/${collection.slug}`}
-                    className="block px-5 py-3 text-sm text-ink hover:bg-mist"
+                    href={`/collection/${collection.slug}`}
+                    onClick={() => setCollectionsOpen(false)}
+                    className="block px-5 py-2.5 text-sm text-ink hover:bg-mist"
                   >
                     {collection.name}
                   </Link>
                 ))}
-                -
               </div>
             )}
           </div>
+
           <CartLink count={count} />
         </nav>
 
@@ -118,7 +139,7 @@ export function Nav() {
       </div>
 
       {open && (
-        <nav className="border-t border-line bg-white md:hidden">
+        <nav className="max-h-[80vh] overflow-y-auto border-t border-line bg-white md:hidden">
           {nav.map((item) => (
             <Link
               key={item.href}
@@ -129,22 +150,44 @@ export function Nav() {
               {item.label}
             </Link>
           ))}
-          <div className="border-t border-line">
-            <p className="px-5 pt-4 pb-2 text-xs font-semibold uppercase tracking-wider text-ink/50">
-              Collections
-            </p>
-
-            {collections.map((collection) => (
-              <Link
-                key={collection.id}
-                href={`/collections/${collection.slug}`}
-                onClick={() => setOpen(false)}
-                className="block px-8 py-3 text-sm text-ink/80 hover:bg-mist"
+          {collections.length > 0 && (
+            <div className="border-t border-line">
+              <button
+                type="button"
+                onClick={() => setMobileCollectionsOpen((v) => !v)}
+                aria-expanded={mobileCollectionsOpen}
+                className="flex w-full items-center justify-between px-5 py-3 text-sm text-ink/80 hover:bg-mist"
               >
-                {collection.name}
-              </Link>
-            ))}
-          </div>
+                Collections
+                <svg
+                  className={`h-4 w-4 transition-transform ${
+                    mobileCollectionsOpen ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M6 9l6 6 6-6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              {mobileCollectionsOpen &&
+                collections.map((collection) => (
+                  <Link
+                    key={collection.id}
+                    href={`/collection/${collection.slug}`}
+                    onClick={() => setOpen(false)}
+                    className="block bg-mist/40 px-8 py-3 text-sm text-ink/70 hover:bg-mist"
+                  >
+                    {collection.name}
+                  </Link>
+                ))}
+            </div>
+          )}
         </nav>
       )}
     </header>

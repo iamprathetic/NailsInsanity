@@ -17,6 +17,9 @@ export async function notifyOwnerOfOrder(order: {
   pincode: string;
   items: OrderItem[];
   total: number;
+  shippingMethod?: string;
+  discount?: number;
+  couponCode?: string | null;
 }): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -31,12 +34,21 @@ export async function notifyOwnerOfOrder(order: {
     )
     .join("\n");
 
+  const shippingLabel =
+    order.shippingMethod === "express"
+      ? "🚀 Express (2–4 days)"
+      : "Free (7–14 days)";
+
   const text = [
     `🎉 *New Order — ${order.reference}*`,
     ``,
     `*Items:*`,
     lines,
     ``,
+    ...(order.discount && order.discount > 0
+      ? [`*Coupon:* ${order.couponCode} (−${formatPrice(order.discount)})`]
+      : []),
+    `*Shipping:* ${shippingLabel}`,
     `*Total:* ${formatPrice(order.total)}`,
     ``,
     `*Customer:* ${order.customerName}`,

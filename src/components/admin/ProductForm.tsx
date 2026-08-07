@@ -15,6 +15,7 @@ export type ProductFormData = {
   stock: number;
   active: boolean;
   featured: boolean;
+  bestSeller: boolean;
   collectionId: string | null;
 };
 
@@ -27,6 +28,7 @@ const empty: ProductFormData = {
   stock: 0,
   active: true,
   featured: false,
+  bestSeller: false,
   collectionId: null,
 };
 
@@ -119,6 +121,7 @@ export function ProductForm({
         stock: Number(data.stock),
         active: data.active,
         featured: data.featured,
+        bestSeller: data.bestSeller,
         collectionId: creatingCollection ? null : collectionChoice || null,
         newCollectionName: creatingCollection ? newCollectionName.trim() : undefined,
       }),
@@ -324,11 +327,11 @@ export function ProductForm({
         <label className="flex items-center gap-2 text-sm text-navy">
           <input
             type="checkbox"
-            checked={data.featured}
-            onChange={(e) => set("featured", e.target.checked)}
+            checked={data.bestSeller}
+            onChange={(e) => set("bestSeller", e.target.checked)}
             className="h-4 w-4 accent-navy"
           />
-          Feature on homepage
+          Best seller (show on checkout)
         </label>
       </div>
 
