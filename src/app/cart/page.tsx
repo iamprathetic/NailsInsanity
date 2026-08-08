@@ -6,6 +6,7 @@ import { useCart } from "@/components/CartProvider";
 import { formatPrice } from "@/lib/format";
 import { ButtonLink } from "@/components/Button";
 import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
+import { BestSellers } from "@/components/BestSellers";
 import { useEffect } from "react";
 
 export default function CartPage() {
@@ -180,6 +181,8 @@ export default function CartPage() {
           </Link>
         </aside>
       </div>
+
+      <BestSellers />
     </div>
   );
 }

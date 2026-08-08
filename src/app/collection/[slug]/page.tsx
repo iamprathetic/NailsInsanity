@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/ProductCard";
 import { getCollectionBySlug } from "@/lib/collections";
+import { BestSellers } from "@/components/BestSellers";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,7 @@ export default async function CollectionPage({
   if (!c) notFound();
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-16">
+    <div className="mx-auto max-w-6xl px-5 pt-16 pb-8">
       <header className="text-center">
         <p className="eyebrow text-royal">Collection</p>
         <h1 className="mt-2 text-4xl text-navy md:text-5xl">{c.name}</h1>
@@ -45,6 +46,8 @@ export default async function CollectionPage({
           No products in this collection yet.
         </p>
       )}
+
+      <BestSellers />
     </div>
   );
 }

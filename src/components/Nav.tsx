@@ -7,6 +7,11 @@ import { nav } from "@/lib/site";
 import { useCart } from "@/components/CartProvider";
 import { Logo } from "@/components/Logo";
 
+// Order: Home, Shop, Collections, Contact.
+const home = nav.find((n) => n.label === "Home")!;
+const shop = nav.find((n) => n.label === "Shop")!;
+const contact = nav.find((n) => n.label === "Contact")!;
+
 export function Nav() {
   const pathname = usePathname();
   const { count } = useCart();
@@ -49,29 +54,30 @@ export function Nav() {
     return () => document.removeEventListener("mousedown", onDocClick);
   }, [collectionsOpen]);
 
+  function desktopLink(item: { label: string; href: string }) {
+    const active =
+      item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        className={`text-sm tracking-wide transition-colors hover:text-royal ${
+          active ? "text-navy font-semibold" : "text-ink/70"
+        }`}
+      >
+        {item.label}
+      </Link>
+    );
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-white/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
         <Logo />
 
         <nav className="hidden items-center gap-9 md:flex">
-          {nav.map((item) => {
-            const active =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`text-sm tracking-wide transition-colors hover:text-royal ${
-                  active ? "text-navy font-semibold" : "text-ink/70"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+          {desktopLink(home)}
+          {desktopLink(shop)}
 
           {/* Collections (click/tap to toggle — works on touch) */}
           <div className="relative" ref={collectionsRef}>
@@ -115,6 +121,8 @@ export function Nav() {
             )}
           </div>
 
+          {desktopLink(contact)}
+
           <CartLink count={count} />
         </nav>
 
@@ -140,16 +148,21 @@ export function Nav() {
 
       {open && (
         <nav className="max-h-[80vh] overflow-y-auto border-t border-line bg-white md:hidden">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setOpen(false)}
-              className="block px-5 py-3 text-sm text-ink/80 hover:bg-mist"
-            >
-              {item.label}
-            </Link>
-          ))}
+          <Link
+            href={home.href}
+            onClick={() => setOpen(false)}
+            className="block px-5 py-3 text-sm text-ink/80 hover:bg-mist"
+          >
+            {home.label}
+          </Link>
+          <Link
+            href={shop.href}
+            onClick={() => setOpen(false)}
+            className="block px-5 py-3 text-sm text-ink/80 hover:bg-mist"
+          >
+            {shop.label}
+          </Link>
+
           {collections.length > 0 && (
             <div className="border-t border-line">
               <button
@@ -188,6 +201,14 @@ export function Nav() {
                 ))}
             </div>
           )}
+
+          <Link
+            href={contact.href}
+            onClick={() => setOpen(false)}
+            className="block border-t border-line px-5 py-3 text-sm text-ink/80 hover:bg-mist"
+          >
+            {contact.label}
+          </Link>
         </nav>
       )}
     </header>
