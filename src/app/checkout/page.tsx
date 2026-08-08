@@ -213,7 +213,7 @@ export default function CheckoutPage() {
     "w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink outline-none transition-colors focus:border-navy";
 
   return (
-    <div className="mx-auto max-w-5xl px-5 py-12">
+    <div className="mx-auto max-w-5xl px-5 pt-12 pb-6">
       <h1 className="text-4xl text-navy">Checkout</h1>
 
       <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_22rem]">

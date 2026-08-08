@@ -5,7 +5,7 @@ import { Logo } from "@/components/Logo";
 export function Footer() {
   const year = 2026;
   return (
-    <footer className="mt-24 border-t border-line bg-mist">
+    <footer className="mt-10 border-t border-line bg-mist">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-2">
           <Logo />
