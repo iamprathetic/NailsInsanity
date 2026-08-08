@@ -61,12 +61,13 @@ export async function getActiveProducts(): Promise<ProductView[]> {
   return rows.map(toProductView);
 }
 
-// Products the owner flagged as best sellers — shown on the checkout page.
-export async function getBestSellers(limit = 12): Promise<ProductView[]> {
+// Products the owner flagged as best sellers. Pass no limit to get all of them
+// (used by the dedicated /best-sellers page).
+export async function getBestSellers(limit?: number): Promise<ProductView[]> {
   const rows = await prisma.product.findMany({
     where: { active: true, bestSeller: true },
     orderBy: { createdAt: "desc" },
-    take: limit,
+    ...(limit ? { take: limit } : {}),
   });
   return rows.map(toProductView);
 }

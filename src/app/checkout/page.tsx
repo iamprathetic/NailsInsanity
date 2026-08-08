@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/components/CartProvider";
 import { formatPrice } from "@/lib/format";
-import { shippingMethods, shippingFeeFor } from "@/lib/site";
+import { shippingFeeFor } from "@/lib/site";
 import { Button } from "@/components/Button";
 import { ButtonLink } from "@/components/Button";
 import { BestSellers } from "@/components/BestSellers";
+import { ShippingMethodSelector } from "@/components/ShippingMethodSelector";
 
 type RazorpayResponse = {
   razorpay_order_id: string;
@@ -46,12 +47,19 @@ const emptyForm = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, total, count, clear, mysteryCount } = useCart();
+  const {
+    items,
+    total,
+    count,
+    clear,
+    mysteryCount,
+    shippingMethod,
+    setShippingMethod,
+  } = useCart();
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [shippingMethod, setShippingMethod] = useState<string>("free");
   const [couponInput, setCouponInput] = useState("");
   const [applied, setApplied] = useState<{ code: string; discount: number } | null>(
     null
@@ -298,32 +306,10 @@ export default function CheckoutPage() {
 
           {/* Shipping method */}
           <div className="pt-2">
-            <h2 className="font-display text-xl text-navy">Shipping method</h2>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              {shippingMethods.map((m) => {
-                const selected = shippingMethod === m.id;
-                return (
-                  <button
-                    type="button"
-                    key={m.id}
-                    onClick={() => setShippingMethod(m.id)}
-                    className={`rounded-2xl border p-4 text-left transition-colors ${
-                      selected
-                        ? "border-navy bg-navy/5"
-                        : "border-line hover:border-navy/40"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-medium text-navy">{m.label}</span>
-                      <span className="text-sm font-medium text-navy">
-                        {m.fee === 0 ? "Free" : formatPrice(m.fee)}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-ink/60">{m.eta}</p>
-                  </button>
-                );
-              })}
-            </div>
+            <ShippingMethodSelector
+              value={shippingMethod}
+              onChange={setShippingMethod}
+            />
           </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}

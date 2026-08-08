@@ -1,14 +1,20 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
 import { getHomeSections } from "@/lib/collections";
-import type { ProductView } from "@/lib/products";
+import { getBestSellers, type ProductView } from "@/lib/products";
 
 // Render on demand so newly-added products / collections always show up.
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const { collections, uncategorized } = await getHomeSections();
-  const isEmpty = collections.length === 0 && uncategorized.length === 0;
+  const [{ collections, uncategorized }, bestSellers] = await Promise.all([
+    getHomeSections(),
+    getBestSellers(),
+  ]);
+  const isEmpty =
+    collections.length === 0 &&
+    uncategorized.length === 0 &&
+    bestSellers.length === 0;
 
   return (
     <>
@@ -45,6 +51,14 @@ export default async function HomePage() {
         </section>
       ) : (
         <>
+          {bestSellers.length > 0 && (
+            <ProductSection
+              eyebrow="Collection"
+              title="Best Sellers"
+              products={bestSellers}
+              href="/best-sellers"
+            />
+          )}
           {collections.map((c) => (
             <ProductSection
               key={c.id}

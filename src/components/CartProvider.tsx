@@ -34,10 +34,14 @@ type CartContextValue = {
   clear: () => void;
   stockUpdated: boolean;
   refreshCartStock: () => Promise<void>;
+  // Shipping method chosen ("free" | "express"), shared between cart & checkout.
+  shippingMethod: string;
+  setShippingMethod: (id: string) => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "ni_cart_v1";
+const SHIPPING_KEY = "ni_shipping_v1";
 
 function sameLine(a: CartItem, productId: string, size: string) {
   return a.productId === productId && a.size === size;
@@ -47,12 +51,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [stockUpdated, setStockUpdated] = useState(false);
+  const [shippingMethod, setShippingMethod] = useState("free");
 
-  // Load persisted cart on mount.
+  // Load persisted cart + shipping choice on mount.
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setItems(JSON.parse(raw));
+      const savedShipping = localStorage.getItem(SHIPPING_KEY);
+      if (savedShipping) setShippingMethod(savedShipping);
     } catch {
       /* ignore corrupt storage */
     }
@@ -68,6 +75,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
       /* storage full / unavailable */
     }
   }, [items, hydrated]);
+
+  // Persist the shipping choice so it carries from cart to checkout.
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      localStorage.setItem(SHIPPING_KEY, shippingMethod);
+    } catch {
+      /* storage full / unavailable */
+    }
+  }, [shippingMethod, hydrated]);
   async function refreshCartStock() {
   if (items.length === 0) return;
 
@@ -140,6 +157,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       stockUpdated,
       refreshCartStock,
       hydrated,
+      shippingMethod,
+      setShippingMethod,
       addItem: (item) =>
         setItems((prev) => {
           const idx = prev.findIndex((p) =>
@@ -167,7 +186,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ),
       clear: () => setItems([]),
     };
-  }, [items, hydrated, stockUpdated, refreshCartStock]);
+  }, [items, hydrated, stockUpdated, refreshCartStock, shippingMethod]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

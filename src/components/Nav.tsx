@@ -105,8 +105,15 @@ export function Nav() {
               </svg>
             </button>
 
-            {collectionsOpen && collections.length > 0 && (
+            {collectionsOpen && (
               <div className="absolute left-0 mt-3 max-h-[70vh] w-60 overflow-y-auto rounded-2xl border border-line bg-white py-1 shadow-xl">
+                <Link
+                  href="/best-sellers"
+                  onClick={() => setCollectionsOpen(false)}
+                  className="block border-b border-line px-5 py-2.5 text-sm font-medium text-navy hover:bg-mist"
+                >
+                  Best sellers
+                </Link>
                 {collections.map((collection) => (
                   <Link
                     key={collection.id}
@@ -163,33 +170,40 @@ export function Nav() {
             {shop.label}
           </Link>
 
-          {collections.length > 0 && (
-            <div className="border-t border-line">
-              <button
-                type="button"
-                onClick={() => setMobileCollectionsOpen((v) => !v)}
-                aria-expanded={mobileCollectionsOpen}
-                className="flex w-full items-center justify-between px-5 py-3 text-sm text-ink/80 hover:bg-mist"
+          <div className="border-t border-line">
+            <button
+              type="button"
+              onClick={() => setMobileCollectionsOpen((v) => !v)}
+              aria-expanded={mobileCollectionsOpen}
+              className="flex w-full items-center justify-between px-5 py-3 text-sm text-ink/80 hover:bg-mist"
+            >
+              Collections
+              <svg
+                className={`h-4 w-4 transition-transform ${
+                  mobileCollectionsOpen ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
               >
-                Collections
-                <svg
-                  className={`h-4 w-4 transition-transform ${
-                    mobileCollectionsOpen ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
+                <path
+                  d="M6 9l6 6 6-6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            {mobileCollectionsOpen && (
+              <>
+                <Link
+                  href="/best-sellers"
+                  onClick={() => setOpen(false)}
+                  className="block bg-mist/40 px-8 py-3 text-sm font-medium text-navy hover:bg-mist"
                 >
-                  <path
-                    d="M6 9l6 6 6-6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-              {mobileCollectionsOpen &&
-                collections.map((collection) => (
+                  Best sellers
+                </Link>
+                {collections.map((collection) => (
                   <Link
                     key={collection.id}
                     href={`/collection/${collection.slug}`}
@@ -199,8 +213,9 @@ export function Nav() {
                     {collection.name}
                   </Link>
                 ))}
-            </div>
-          )}
+              </>
+            )}
+          </div>
 
           <Link
             href={contact.href}

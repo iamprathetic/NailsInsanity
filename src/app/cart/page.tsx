@@ -4,17 +4,32 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/components/CartProvider";
 import { formatPrice } from "@/lib/format";
+import { shippingFeeFor } from "@/lib/site";
 import { ButtonLink } from "@/components/Button";
 import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 import { BestSellers } from "@/components/BestSellers";
+import { ShippingMethodSelector } from "@/components/ShippingMethodSelector";
 import { useEffect } from "react";
 
 export default function CartPage() {
-  const { items, total, setQty, removeItem, mysteryCount, refreshCartStock, stockUpdated, } = useCart();
+  const {
+    items,
+    total,
+    setQty,
+    removeItem,
+    mysteryCount,
+    refreshCartStock,
+    stockUpdated,
+    shippingMethod,
+    setShippingMethod,
+  } = useCart();
 
   useEffect(() => {
     refreshCartStock();
   }, [refreshCartStock]);
+
+  const shippingFee = shippingFeeFor(shippingMethod);
+  const grandTotal = total + shippingFee;
 
   if (items.length === 0) {
     return (
@@ -145,6 +160,17 @@ export default function CartPage() {
               <span className="font-semibold text-royal">FREE Mystery Set</span> 🎁
             </div>
           )}
+
+          <div className="mt-10">
+            <BestSellers />
+          </div>
+
+          <div className="mt-10">
+            <ShippingMethodSelector
+              value={shippingMethod}
+              onChange={setShippingMethod}
+            />
+          </div>
         </div>
 
         {/* Summary */}
@@ -163,11 +189,13 @@ export default function CartPage() {
             )}
             <div className="flex justify-between">
               <dt className="text-ink/60">Shipping</dt>
-              <dd className="text-green-700">Free</dd>
+              <dd className={shippingFee === 0 ? "text-green-700" : "text-navy"}>
+                {shippingFee === 0 ? "Free" : formatPrice(shippingFee)}
+              </dd>
             </div>
             <div className="flex justify-between border-t border-line pt-3 text-base font-semibold">
               <dt className="text-navy">Total</dt>
-              <dd className="text-navy">{formatPrice(total)}</dd>
+              <dd className="text-navy">{formatPrice(grandTotal)}</dd>
             </div>
           </dl>
           <ButtonLink href="/checkout" size="lg" className="mt-6 w-full">
@@ -181,8 +209,6 @@ export default function CartPage() {
           </Link>
         </aside>
       </div>
-
-      <BestSellers />
     </div>
   );
 }
