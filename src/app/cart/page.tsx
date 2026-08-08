@@ -56,8 +56,10 @@ export default function CartPage() {
       <h1 className="text-4xl text-navy">Your cart</h1>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_20rem]">
-        {/* Line items */}
-        <div>
+        {/* Line items (min-w-0 lets this column shrink below the Best
+            Sellers horizontal scroller's content width, instead of the
+            scroller forcing the whole page wider on mobile) */}
+        <div className="min-w-0">
         <ul className="divide-y divide-line">
           {items.map((item) => (
             <li
