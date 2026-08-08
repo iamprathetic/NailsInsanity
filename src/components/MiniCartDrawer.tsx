@@ -79,7 +79,7 @@ export function MiniCartDrawer({
         role="dialog"
         aria-modal="true"
         aria-label="Cart"
-        className={`fixed inset-y-0 right-0 z-[80] flex w-full max-w-sm flex-col bg-white shadow-2xl transition-transform duration-300 ${
+        className={`fixed right-0 top-0 z-[80] flex h-dvh w-full max-w-sm flex-col bg-white shadow-2xl transition-transform duration-300 ${
           visible ? "translate-x-0" : "translate-x-full"
         }`}
       >
