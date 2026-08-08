@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import { useCart } from "@/components/CartProvider";
 import { formatPrice } from "@/lib/format";
 import { shippingFeeFor } from "@/lib/site";
-import { ButtonLink } from "@/components/Button";
+import { Button, ButtonLink } from "@/components/Button";
 import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 import { BestSellers } from "@/components/BestSellers";
 import { ShippingMethodSelector } from "@/components/ShippingMethodSelector";
-import { useEffect } from "react";
 
 export default function CartPage() {
   const {
@@ -22,14 +22,41 @@ export default function CartPage() {
     stockUpdated,
     shippingMethod,
     setShippingMethod,
+    coupon,
+    applyCoupon,
+    removeCoupon,
   } = useCart();
+
+  const [couponInput, setCouponInput] = useState("");
+  const [couponMsg, setCouponMsg] = useState("");
+  const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
 
   useEffect(() => {
     refreshCartStock();
   }, [refreshCartStock]);
 
   const shippingFee = shippingFeeFor(shippingMethod);
-  const grandTotal = total + shippingFee;
+  const discount = coupon?.discount ?? 0;
+  const grandTotal = Math.max(0, total - discount) + shippingFee;
+
+  async function handleApplyCoupon() {
+    setCouponError("");
+    setCouponMsg("");
+    if (!couponInput.trim()) return setCouponError("Enter a coupon code.");
+    setCouponLoading(true);
+    const result = await applyCoupon(couponInput);
+    setCouponLoading(false);
+    if (result.ok) setCouponMsg(result.message);
+    else setCouponError(result.message);
+  }
+
+  function handleRemoveCoupon() {
+    removeCoupon();
+    setCouponInput("");
+    setCouponMsg("");
+    setCouponError("");
+  }
 
   if (items.length === 0) {
     return (
@@ -173,6 +200,51 @@ export default function CartPage() {
               onChange={setShippingMethod}
             />
           </div>
+
+          {/* Coupon */}
+          <div className="mt-10">
+            <h2 className="font-display text-xl text-navy">Coupon code</h2>
+            <div className="mt-3">
+              {coupon ? (
+                <div className="flex items-center justify-between gap-2 rounded-xl bg-green-50 px-4 py-3">
+                  <span className="text-sm text-green-700">
+                    Coupon <strong>{coupon.code}</strong> applied — you saved{" "}
+                    {formatPrice(coupon.discount)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleRemoveCoupon}
+                    className="text-xs text-ink/50 hover:text-red-600"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    className="w-full rounded-xl border border-line bg-white px-4 py-3 text-sm uppercase text-ink outline-none focus:border-navy"
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                    placeholder="Coupon code"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleApplyCoupon}
+                    disabled={couponLoading}
+                  >
+                    {couponLoading ? "…" : "Apply"}
+                  </Button>
+                </div>
+              )}
+              {couponMsg && !coupon && (
+                <p className="mt-2 text-xs text-green-700">{couponMsg}</p>
+              )}
+              {couponError && (
+                <p className="mt-2 text-xs text-red-600">{couponError}</p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Summary */}
@@ -187,6 +259,12 @@ export default function CartPage() {
               <div className="flex justify-between">
                 <dt className="text-ink/60">Mystery Set × {mysteryCount}</dt>
                 <dd className="text-green-700">FREE</dd>
+              </div>
+            )}
+            {discount > 0 && (
+              <div className="flex justify-between">
+                <dt className="text-ink/60">Discount</dt>
+                <dd className="text-green-700">−{formatPrice(discount)}</dd>
               </div>
             )}
             <div className="flex justify-between">

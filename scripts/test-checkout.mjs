@@ -34,15 +34,15 @@ try {
     data: { code: `${P}10`, type: "percent", value: 10, minSets: 2, active: true },
   });
 
-  // Case 1: 2 sets (subtotal 1000) + express (99) + 10% coupon (100) => 999
+  // Case 1: 2 sets (subtotal 1000) + express (300) + 10% coupon (100) => 1200
   const r1 = await order({
     customer, items: [{ productId: prod.id, size: "", qty: 2 }],
     shippingMethod: "express", couponCode: `${P}10`,
   });
   const o1 = await prisma.order.findUnique({ where: { reference: r1.reference } });
   console.log(
-    o1.total === 999 && o1.discount === 100 && o1.shippingFee === 99 && o1.shippingMethod === "express" && o1.couponCode === `${P}10`
-      ? "✅ Case 1: subtotal 1000 − 100 coupon + 99 express = ₹999 ✔"
+    o1.total === 1200 && o1.discount === 100 && o1.shippingFee === 300 && o1.shippingMethod === "express" && o1.couponCode === `${P}10`
+      ? "✅ Case 1: subtotal 1000 − 100 coupon + 300 express = ₹1200 ✔"
       : `❌ Case 1 wrong: total=${o1.total} discount=${o1.discount} ship=${o1.shippingFee} method=${o1.shippingMethod}`
   );
 

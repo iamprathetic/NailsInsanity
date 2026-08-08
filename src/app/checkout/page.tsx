@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/components/CartProvider";
 import { formatPrice } from "@/lib/format";
-import { shippingFeeFor } from "@/lib/site";
-import { Button } from "@/components/Button";
-import { ButtonLink } from "@/components/Button";
+import { shippingFeeFor, shippingMethods } from "@/lib/site";
+import { Button, ButtonLink } from "@/components/Button";
 import { BestSellers } from "@/components/BestSellers";
-import { ShippingMethodSelector } from "@/components/ShippingMethodSelector";
 
 type RazorpayResponse = {
   razorpay_order_id: string;
@@ -47,30 +46,16 @@ const emptyForm = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const {
-    items,
-    total,
-    count,
-    clear,
-    mysteryCount,
-    shippingMethod,
-    setShippingMethod,
-  } = useCart();
+  const { items, total, clear, mysteryCount, shippingMethod, coupon } =
+    useCart();
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [couponInput, setCouponInput] = useState("");
-  const [applied, setApplied] = useState<{ code: string; discount: number } | null>(
-    null
-  );
-  const [couponMsg, setCouponMsg] = useState("");
-  const [couponError, setCouponError] = useState("");
-  const [couponLoading, setCouponLoading] = useState(false);
-
   const subtotal = total;
   const shippingFee = shippingFeeFor(shippingMethod);
-  const discount = applied?.discount ?? 0;
+  const shippingInfo = shippingMethods.find((m) => m.id === shippingMethod);
+  const discount = coupon?.discount ?? 0;
   const grandTotal = Math.max(0, subtotal - discount) + shippingFee;
 
   if (items.length === 0) {
@@ -91,39 +76,6 @@ export default function CheckoutPage() {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
-  async function applyCoupon() {
-    setCouponError("");
-    setCouponMsg("");
-    if (!couponInput.trim()) return setCouponError("Enter a coupon code.");
-    setCouponLoading(true);
-    try {
-      const res = await fetch("/api/coupon/validate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponInput, qty: count, subtotal }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        setApplied({ code: data.code, discount: data.discount });
-        setCouponMsg(data.message);
-      } else {
-        setApplied(null);
-        setCouponError(data.message || "Invalid coupon.");
-      }
-    } catch {
-      setCouponError("Could not check that coupon. Try again.");
-    } finally {
-      setCouponLoading(false);
-    }
-  }
-
-  function removeCoupon() {
-    setApplied(null);
-    setCouponInput("");
-    setCouponMsg("");
-    setCouponError("");
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -141,7 +93,7 @@ export default function CheckoutPage() {
             qty: i.qty,
           })),
           shippingMethod,
-          couponCode: applied?.code ?? null,
+          couponCode: coupon?.code ?? null,
         }),
       });
 
@@ -304,14 +256,6 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Shipping method */}
-          <div className="pt-2">
-            <ShippingMethodSelector
-              value={shippingMethod}
-              onChange={setShippingMethod}
-            />
-          </div>
-
           {error && <p className="text-sm text-red-600">{error}</p>}
 
           <Button type="submit" size="lg" disabled={loading} className="w-full">
@@ -319,95 +263,86 @@ export default function CheckoutPage() {
           </Button>
         </form>
 
-        {/* Summary */}
-        <aside className="h-fit rounded-2xl border border-line bg-mist/50 p-6">
-          <h2 className="font-display text-xl text-navy">Your order</h2>
-          <ul className="mt-4 space-y-3">
-            {items.map((i) => (
-              <li
-                key={`${i.productId}-${i.size}`}
-                className="flex justify-between gap-3 text-sm"
-              >
-                <span className="text-ink/70">
-                  {i.name}
-                  {i.size ? ` (${i.size})` : ""} × {i.qty}
-                </span>
-                <span className="text-navy">{formatPrice(i.price * i.qty)}</span>
-              </li>
-            ))}
-            {mysteryCount > 0 && (
-              <li className="flex justify-between gap-3 text-sm">
-                <span className="text-ink/70">🎁 Mystery Set × {mysteryCount}</span>
-                <span className="text-green-700">FREE</span>
-              </li>
-            )}
-          </ul>
-
-          {/* Coupon */}
-          <div className="mt-5 border-t border-line pt-4">
-            {applied ? (
-              <div className="flex items-center justify-between gap-2 rounded-xl bg-green-50 px-3 py-2">
-                <span className="text-sm text-green-700">
-                  Coupon <strong>{applied.code}</strong> applied
-                </span>
-                <button
-                  type="button"
-                  onClick={removeCoupon}
-                  className="text-xs text-ink/50 hover:text-red-600"
-                >
-                  Remove
-                </button>
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                <input
-                  className="w-full rounded-xl border border-line bg-white px-3 py-2 text-sm uppercase text-ink outline-none focus:border-navy"
-                  value={couponInput}
-                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                  placeholder="Coupon code"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={applyCoupon}
-                  disabled={couponLoading}
-                >
-                  {couponLoading ? "…" : "Apply"}
-                </Button>
-              </div>
-            )}
-            {couponMsg && !applied && (
-              <p className="mt-2 text-xs text-green-700">{couponMsg}</p>
-            )}
-            {couponError && (
-              <p className="mt-2 text-xs text-red-600">{couponError}</p>
-            )}
+        {/* Final order summary — read-only. Shipping method and coupon are
+            chosen in the cart; change them there, not here. */}
+        <aside className="h-fit overflow-hidden rounded-2xl border border-line shadow-sm">
+          <div className="bg-navy px-6 py-5 text-white">
+            <p className="eyebrow text-white/60">Final</p>
+            <h2 className="mt-1 font-display text-2xl">Order Summary</h2>
           </div>
 
-          {/* Totals */}
-          <dl className="mt-5 space-y-3 border-t border-line pt-4 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-ink/60">Subtotal</dt>
-              <dd className="text-navy">{formatPrice(subtotal)}</dd>
+          <div className="bg-white p-6">
+            <ul className="space-y-3">
+              {items.map((i) => (
+                <li
+                  key={`${i.productId}-${i.size}`}
+                  className="flex justify-between gap-3 text-sm"
+                >
+                  <span className="text-ink/70">
+                    {i.name}
+                    {i.size ? ` (${i.size})` : ""} × {i.qty}
+                  </span>
+                  <span className="text-navy">
+                    {formatPrice(i.price * i.qty)}
+                  </span>
+                </li>
+              ))}
+              {mysteryCount > 0 && (
+                <li className="flex justify-between gap-3 text-sm">
+                  <span className="text-ink/70">
+                    🎁 Mystery Set × {mysteryCount}
+                  </span>
+                  <span className="text-green-700">FREE</span>
+                </li>
+              )}
+            </ul>
+
+            {/* Read-only shipping + coupon badges */}
+            <div className="mt-5 flex flex-wrap gap-2 border-t border-line pt-4">
+              <span className="rounded-full bg-mist px-3 py-1 text-xs font-medium text-navy">
+                {shippingInfo?.label ?? "Free shipping"}
+                {shippingInfo?.eta ? ` · ${shippingInfo.eta}` : ""}
+              </span>
+              {coupon && (
+                <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
+                  Coupon {coupon.code} applied
+                </span>
+              )}
             </div>
-            {discount > 0 && (
+
+            <dl className="mt-5 space-y-3 border-t border-line pt-4 text-sm">
               <div className="flex justify-between">
-                <dt className="text-ink/60">Discount</dt>
-                <dd className="text-green-700">−{formatPrice(discount)}</dd>
+                <dt className="text-ink/60">Subtotal</dt>
+                <dd className="text-navy">{formatPrice(subtotal)}</dd>
               </div>
-            )}
-            <div className="flex justify-between">
-              <dt className="text-ink/60">Shipping</dt>
-              <dd className={shippingFee === 0 ? "text-green-700" : "text-navy"}>
-                {shippingFee === 0 ? "Free" : formatPrice(shippingFee)}
-              </dd>
+              {discount > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-ink/60">Discount</dt>
+                  <dd className="text-green-700">−{formatPrice(discount)}</dd>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <dt className="text-ink/60">Shipping</dt>
+                <dd className={shippingFee === 0 ? "text-green-700" : "text-navy"}>
+                  {shippingFee === 0 ? "Free" : formatPrice(shippingFee)}
+                </dd>
+              </div>
+            </dl>
+
+            <div className="mt-4 flex items-baseline justify-between rounded-xl bg-navy/5 px-4 py-4">
+              <span className="font-display text-lg text-navy">Total</span>
+              <span className="font-display text-2xl text-navy">
+                {formatPrice(grandTotal)}
+              </span>
             </div>
-            <div className="flex justify-between border-t border-line pt-3 text-base font-semibold">
-              <dt className="text-navy">Total</dt>
-              <dd className="text-navy">{formatPrice(grandTotal)}</dd>
-            </div>
-          </dl>
+
+            <Link
+              href="/cart"
+              className="mt-4 block text-center text-xs text-ink/50 hover:text-royal"
+            >
+              Want to change shipping or your coupon? Edit cart →
+            </Link>
+          </div>
         </aside>
       </div>
 

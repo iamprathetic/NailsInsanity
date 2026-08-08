@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { nav } from "@/lib/site";
 import { useCart } from "@/components/CartProvider";
 import { Logo } from "@/components/Logo";
+import { MiniCartDrawer } from "@/components/MiniCartDrawer";
 
 // Order: Home, Shop, Collections, Contact.
 const home = nav.find((n) => n.label === "Home")!;
@@ -16,6 +17,7 @@ export function Nav() {
   const pathname = usePathname();
   const { count } = useCart();
   const [open, setOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
   const [collections, setCollections] = useState<
     { id: string; name: string; slug: string }[]
   >([]);
@@ -53,6 +55,12 @@ export function Nav() {
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
   }, [collectionsOpen]);
+
+  // Skip opening the mini drawer if already on the full cart page.
+  function handleCartClick() {
+    if (pathname.startsWith("/cart")) return;
+    setCartOpen(true);
+  }
 
   function desktopLink(item: { label: string; href: string }) {
     const active =
@@ -130,12 +138,12 @@ export function Nav() {
 
           {desktopLink(contact)}
 
-          <CartLink count={count} />
+          <CartLink count={count} onClick={handleCartClick} />
         </nav>
 
         {/* Mobile controls */}
         <div className="flex items-center gap-4 md:hidden">
-          <CartLink count={count} />
+          <CartLink count={count} onClick={handleCartClick} />
           <button
             aria-label="Menu"
             onClick={() => setOpen((v) => !v)}
@@ -226,14 +234,23 @@ export function Nav() {
           </Link>
         </nav>
       )}
+
+      <MiniCartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </header>
   );
 }
 
-function CartLink({ count }: { count: number }) {
+function CartLink({
+  count,
+  onClick,
+}: {
+  count: number;
+  onClick: () => void;
+}) {
   return (
-    <Link
-      href="/cart"
+    <button
+      type="button"
+      onClick={onClick}
       aria-label={`Cart, ${count} items`}
       className="relative inline-flex items-center text-navy hover:text-royal"
     >
@@ -251,6 +268,6 @@ function CartLink({ count }: { count: number }) {
           {count}
         </span>
       )}
-    </Link>
+    </button>
   );
 }
