@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/Button";
+import { ImageCropModal } from "@/components/admin/ImageCropModal";
 import type { CollectionOption } from "@/lib/collections";
 
 export type ProductFormData = {
@@ -57,6 +58,9 @@ export function ProductForm({
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // Index into data.images of the photo currently open in the crop modal
+  // (null = modal closed).
+  const [cropIndex, setCropIndex] = useState<number | null>(null);
 
   function set<K extends keyof ProductFormData>(key: K, value: ProductFormData[K]) {
     setData((d) => ({ ...d, [key]: value }));
@@ -91,6 +95,26 @@ export function ProductForm({
 
   function removeImage(url: string) {
     set("images", data.images.filter((x) => x !== url));
+  }
+
+  async function handleCropSave(blob: Blob) {
+    if (cropIndex === null) return;
+    setUploading(true);
+    setError("");
+    const fd = new FormData();
+    fd.append("file", new File([blob], "cropped.jpg", { type: "image/jpeg" }));
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const json = await res.json().catch(() => ({}));
+    if (res.ok && json.url) {
+      set(
+        "images",
+        data.images.map((url, i) => (i === cropIndex ? json.url : url))
+      );
+      setCropIndex(null);
+    } else {
+      setError(json.error || "Crop upload failed");
+    }
+    setUploading(false);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -291,7 +315,7 @@ export function ProductForm({
         )}
         {data.images.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-3">
-            {data.images.map((url) => (
+            {data.images.map((url, i) => (
               <div key={url} className="relative h-24 w-24">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -299,6 +323,13 @@ export function ProductForm({
                   alt=""
                   className="h-full w-full rounded-xl object-cover"
                 />
+                <button
+                  type="button"
+                  onClick={() => setCropIndex(i)}
+                  className="absolute inset-x-0 bottom-0 rounded-b-xl bg-navy/80 py-1 text-[11px] font-medium text-white hover:bg-navy"
+                >
+                  Crop / align
+                </button>
                 <button
                   type="button"
                   onClick={() => removeImage(url)}
@@ -310,6 +341,18 @@ export function ProductForm({
               </div>
             ))}
           </div>
+        )}
+        <p className="mt-2 text-xs text-ink/50">
+          Tip: use &ldquo;Crop / align&rdquo; on each photo so it&rsquo;s framed
+          the same way (matches the 4:5 card shown on the shop) — this keeps
+          product photos looking aligned across the site.
+        </p>
+        {cropIndex !== null && (
+          <ImageCropModal
+            src={data.images[cropIndex]}
+            onCancel={() => setCropIndex(null)}
+            onSave={handleCropSave}
+          />
         )}
       </div>
 

@@ -72,7 +72,7 @@ export function CollectionOrderManager({
                 <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-mist">
                   {it.image ? (
                     <Image
-                      src={cloudinaryUrl(it.image, 100)}
+                      src={cloudinaryUrl(it.image, 100, 1)}
                       alt=""
                       fill
                       unoptimized

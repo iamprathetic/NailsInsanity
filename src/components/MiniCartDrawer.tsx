@@ -125,7 +125,7 @@ export function MiniCartDrawer({
                   >
                     {item.image ? (
                       <Image
-                        src={cloudinaryUrl(item.image, 120)}
+                        src={cloudinaryUrl(item.image, 120, 1)}
                         alt={item.name}
                         fill
                         unoptimized

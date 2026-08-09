@@ -65,7 +65,7 @@ export default async function AdminProductsPage() {
                       <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-mist">
                         {p.images[0] ? (
                           <Image
-                            src={cloudinaryUrl(p.images[0], 100)}
+                            src={cloudinaryUrl(p.images[0], 100, 1)}
                             alt=""
                             fill
                             unoptimized

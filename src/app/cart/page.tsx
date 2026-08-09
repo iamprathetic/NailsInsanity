@@ -99,7 +99,7 @@ export default function CartPage() {
               >
                 {item.image ? (
                   <Image
-                    src={cloudinaryUrl(item.image, 200)}
+                    src={cloudinaryUrl(item.image, 200, 1)}
                     alt={item.name}
                     fill
                     unoptimized

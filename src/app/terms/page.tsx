@@ -43,7 +43,8 @@ export default function TermsPage() {
         </li>
         <li>
           In case of damage during shipping, please contact us within 24 hours
-          of delivery with proof.
+          of delivery with an unboxing video as proof. Claims made after 24
+          hours, or without an unboxing video, will not be accepted.
         </li>
       </ul>
 

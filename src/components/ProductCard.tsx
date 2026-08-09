@@ -13,7 +13,7 @@ export function ProductCard({ product }: { product: ProductView }) {
       <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-mist">
         {image ? (
           <Image
-            src={cloudinaryUrl(image, 800)}
+            src={cloudinaryUrl(image, 800, 4 / 5)}
             alt={product.name}
             fill
             unoptimized

@@ -17,14 +17,14 @@ export default function ContactPage() {
         {site.contact.phone && (
           <ContactCard
             label="Phone"
-            value={site.contact.phone}
-            href={`tel:${site.contact.phone}`}
+            value={site.contact.phoneDisplay}
+            href={`tel:${site.contact.phoneE164}`}
           />
         )}
         {site.contact.whatsapp && (
           <ContactCard
             label="WhatsApp"
-            value={site.contact.phone || site.contact.whatsapp}
+            value={site.contact.phoneDisplay || site.contact.whatsapp}
             href={`https://wa.me/${site.contact.whatsapp}`}
           />
         )}
@@ -40,6 +40,15 @@ export default function ContactPage() {
             label="Instagram"
             value="@nailsinsanity"
             href={site.contact.instagram}
+          />
+        )}
+        {site.contact.address && (
+          <ContactCard
+            label="Address"
+            value={site.contact.address}
+            href={`https://maps.google.com/?q=${encodeURIComponent(
+              site.contact.address
+            )}`}
           />
         )}
       </div>

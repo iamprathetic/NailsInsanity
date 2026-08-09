@@ -43,10 +43,10 @@ export function Footer() {
             {site.contact.phone && (
               <li>
                 <a
-                  href={`tel:${site.contact.phone}`}
+                  href={`tel:${site.contact.phoneE164}`}
                   className="transition-colors hover:text-royal"
                 >
-                  {site.contact.phone}
+                  {site.contact.phoneDisplay}
                 </a>
               </li>
             )}
@@ -59,6 +59,20 @@ export function Footer() {
                   className="transition-colors hover:text-royal"
                 >
                   Instagram
+                </a>
+              </li>
+            )}
+            {site.contact.address && (
+              <li>
+                <a
+                  href={`https://maps.google.com/?q=${encodeURIComponent(
+                    site.contact.address
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition-colors hover:text-royal"
+                >
+                  {site.contact.address}
                 </a>
               </li>
             )}

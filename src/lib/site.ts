@@ -8,8 +8,11 @@ export const site = {
   contact: {
     email: "Nailsinsanity@gmail.com",
     phone: "9013202408",
+    phoneDisplay: "+91 9013202408",
+    phoneE164: "+919013202408", // for tel: links
     instagram: "https://instagram.com/nailsinsanity",
     whatsapp: "919013202408", // with country code, for wa.me links
+    address: "BE-15-B Hari Nagar, New Delhi 110064",
   },
   // Free shipping across India (v1 scope).
   shipping: {
@@ -29,7 +32,8 @@ export const nav = [
 ] as const;
 
 export const footerPolicies = [
-  { label: "Store Policy", href: "/store-policy" },
+  { label: "About Us", href: "/about" },
+  { label: "Privacy Policy", href: "/store-policy" },
   { label: "Terms & Conditions", href: "/terms" },
   { label: "Shipping & Return", href: "/shipping-return" },
   { label: "Contact Us", href: "/contact" },

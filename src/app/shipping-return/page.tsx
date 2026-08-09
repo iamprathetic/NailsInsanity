@@ -17,7 +17,9 @@ export default function ShippingReturnPage() {
         it has been processed.
       </p>
       <p>
-        <strong>Shipping Regions:</strong> We ship Globally.
+        <strong>Shipping Regions:</strong> We currently ship across India only.
+        Free shipping is available on every order, with an optional express
+        shipping upgrade at checkout.
       </p>
 
       <h2>Payment Policy</h2>
@@ -36,10 +38,15 @@ export default function ShippingReturnPage() {
 
       <h2>Claims for Damaged or Defective Products</h2>
       <p>
-        <strong>Unboxing Video Required for Claims:</strong> In the rare event
-        that you receive a damaged or defective product, please record an
-        unboxing video. This video will be required for any claim related to
-        product damage. Claims without an unboxing video will not be accepted.
+        <strong>Report Within 24 Hours:</strong> In the rare event that you
+        receive a damaged or defective product, please contact us within 24
+        hours of delivery.
+      </p>
+      <p>
+        <strong>Unboxing Video Required for Claims:</strong> An unboxing video
+        is required as proof for any claim related to product damage. Claims
+        made after 24 hours of delivery, or without an unboxing video, will
+        not be accepted.
       </p>
 
       <h2>Customer Support</h2>

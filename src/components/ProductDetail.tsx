@@ -111,7 +111,7 @@ export function ProductDetail({ product }: { product: ProductView }) {
           {product.images[activeImage] ? (
             <>
               <Image
-                src={cloudinaryUrl(product.images[activeImage], 1600)}
+                src={cloudinaryUrl(product.images[activeImage], 1600, 1)}
                 alt={product.name}
                 fill
                 unoptimized
@@ -153,7 +153,7 @@ export function ProductDetail({ product }: { product: ProductView }) {
                 }`}
               >
                 <Image
-                  src={cloudinaryUrl(img, 160)}
+                  src={cloudinaryUrl(img, 160, 1)}
                   alt={`${product.name} ${i + 1}`}
                   fill
                   unoptimized

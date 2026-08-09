@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
 
-export const metadata: Metadata = { title: "Store Policy" };
+export const metadata: Metadata = { title: "Privacy Policy" };
 
 export default function StorePolicyPage() {
   return (
-    <LegalPage title="Store Policy">
+    <LegalPage title="Privacy Policy">
       <p>
         At Nails Insanity, your privacy is important to us. We&rsquo;re committed
         to protecting the personal information you share with us.
