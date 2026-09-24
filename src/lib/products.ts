@@ -89,3 +89,24 @@ export async function getProductBySlug(
   const row = await prisma.product.findUnique({ where: { slug } });
   return row ? toProductView(row) : null;
 }
+
+// Matches active products by name or description (case-insensitive).
+export async function searchProducts(
+  query: string,
+  limit?: number
+): Promise<ProductView[]> {
+  const q = query.trim();
+  if (!q) return [];
+  const rows = await prisma.product.findMany({
+    where: {
+      active: true,
+      OR: [
+        { name: { contains: q, mode: "insensitive" } },
+        { description: { contains: q, mode: "insensitive" } },
+      ],
+    },
+    orderBy: { createdAt: "desc" },
+    ...(limit ? { take: limit } : {}),
+  });
+  return rows.map(toProductView);
+}

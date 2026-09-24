@@ -7,6 +7,7 @@ import { nav } from "@/lib/site";
 import { useCart } from "@/components/CartProvider";
 import { Logo } from "@/components/Logo";
 import { MiniCartDrawer } from "@/components/MiniCartDrawer";
+import { SearchOverlay } from "@/components/SearchOverlay";
 
 // Order: Home, Shop, Collections, Contact.
 const home = nav.find((n) => n.label === "Home")!;
@@ -18,6 +19,7 @@ export function Nav() {
   const { count } = useCart();
   const [open, setOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [collections, setCollections] = useState<
     { id: string; name: string; slug: string }[]
   >([]);
@@ -138,11 +140,14 @@ export function Nav() {
 
           {desktopLink(contact)}
 
+          <SearchLink onClick={() => setSearchOpen(true)} />
+
           <CartLink count={count} onClick={handleCartClick} />
         </nav>
 
         {/* Mobile controls */}
         <div className="flex items-center gap-4 md:hidden">
+          <SearchLink onClick={() => setSearchOpen(true)} />
           <CartLink count={count} onClick={handleCartClick} />
           <button
             aria-label="Menu"
@@ -236,7 +241,29 @@ export function Nav() {
       )}
 
       <MiniCartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
+  );
+}
+
+function SearchLink({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Search"
+      className="inline-flex items-center text-navy hover:text-royal"
+    >
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" />
+        <path
+          d="M21 21l-4.3-4.3"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    </button>
   );
 }
 
