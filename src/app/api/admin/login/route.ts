@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
 import { checkCredentials, createAdminSession } from "@/lib/auth";
+import { clientIp, rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: Request) {
+  // 5 attempts per 10 minutes per IP — slows down brute-forcing the admin
+  // password without locking out a real admin who mistypes it once or twice.
+  if (!rateLimit(`admin-login:${clientIp(req)}`, 5, 10 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "Too many attempts. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   let username = "";
   let password = "";
   try {

@@ -14,6 +14,34 @@ import { isCloudinaryConfigured, uploadToCloudinary } from "@/lib/cloudinary";
 const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 
+// The browser-supplied Content-Type header is trivially spoofable, so also
+// check the file's actual magic bytes before trusting it's really an image.
+function sniffImageType(bytes: Buffer): string | null {
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return "image/jpeg";
+  }
+  if (
+    bytes.length >= 8 &&
+    bytes[0] === 0x89 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x4e &&
+    bytes[3] === 0x47
+  ) {
+    return "image/png";
+  }
+  if (bytes.length >= 4 && bytes.toString("ascii", 0, 3) === "GIF") {
+    return "image/gif";
+  }
+  if (
+    bytes.length >= 12 &&
+    bytes.toString("ascii", 0, 4) === "RIFF" &&
+    bytes.toString("ascii", 8, 12) === "WEBP"
+  ) {
+    return "image/webp";
+  }
+  return null;
+}
+
 export async function POST(req: Request) {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -39,6 +67,13 @@ export async function POST(req: Request) {
   }
 
   const bytes = Buffer.from(await file.arrayBuffer());
+
+  if (!sniffImageType(bytes)) {
+    return NextResponse.json(
+      { error: "File does not look like a valid image" },
+      { status: 400 }
+    );
+  }
 
   // Primary: Cloudinary.
   if (isCloudinaryConfigured()) {

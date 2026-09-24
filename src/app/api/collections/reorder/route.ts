@@ -40,4 +40,6 @@ export async function PATCH(req: Request) {
         prisma.product.update({ where: { id }, data: { sortOrder: index } })
       )
   );
+
+  return NextResponse.json({ ok: true });
 }

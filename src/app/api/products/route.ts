@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/auth";
 import { productInputSchema } from "@/lib/validation";
@@ -57,10 +58,11 @@ async function uniqueSlug(name: string): Promise<string> {
   const base = slugify(name) || "product";
   let slug = base;
   let n = 1;
-  // Loop until we find a free slug.
+  // Loop until we find a free slug; after a run of collisions, fall back to
+  // a random suffix instead of looping forever.
   while (await prisma.product.findUnique({ where: { slug } })) {
     n += 1;
-    slug = `${base}-${n}`;
+    slug = n <= 50 ? `${base}-${n}` : `${base}-${crypto.randomUUID().slice(0, 6)}`;
   }
   return slug;
 }

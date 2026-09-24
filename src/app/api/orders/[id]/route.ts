@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/auth";
 
@@ -34,8 +35,12 @@ export async function PATCH(
 
   try {
     await prisma.order.update({ where: { id }, data: { status } });
-  } catch {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    console.error("Failed to update order:", err);
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

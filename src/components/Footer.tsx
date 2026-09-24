@@ -3,7 +3,7 @@ import { site, footerPolicies } from "@/lib/site";
 import { Logo } from "@/components/Logo";
 
 export function Footer() {
-  const year = 2026;
+  const year = new Date().getFullYear();
   return (
     <footer className="mt-10 border-t border-line bg-mist">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:grid-cols-2 lg:grid-cols-4">

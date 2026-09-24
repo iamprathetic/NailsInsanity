@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/auth";
 import { productInputSchema } from "@/lib/validation";
@@ -71,8 +72,12 @@ export async function DELETE(
 
   try {
     await prisma.product.delete({ where: { id } });
-  } catch {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    console.error("Failed to delete product:", err);
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

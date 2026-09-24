@@ -8,6 +8,9 @@ export async function POST(req: Request) {
     if (!Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json([]);
     }
+    if (ids.length > 200) {
+      return NextResponse.json({ error: "Too many ids" }, { status: 400 });
+    }
 
     const products = await prisma.product.findMany({
       where: {

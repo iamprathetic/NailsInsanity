@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/components/CartProvider";
@@ -51,6 +51,19 @@ export default function CheckoutPage() {
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Razorpay verification can fail after the payment popup closes, which
+  // lands the user back here via ?failed=1 — surface that instead of
+  // silently showing a blank reset form.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("failed") === "1") {
+      setError(
+        "Payment could not be verified. If you were charged, please contact us — otherwise, try again."
+      );
+      router.replace("/checkout");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const subtotal = total;
   const shippingFee = shippingFeeFor(shippingMethod);

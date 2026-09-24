@@ -58,7 +58,7 @@ export default function TermsPage() {
         <li>We are not responsible for misuse or improper application.</li>
       </ul>
 
-      <h2>7. Contact &amp; Support</h2>
+      <h2>6. Contact &amp; Support</h2>
       <p>
         For any queries or concerns, please reach out to us via Instagram DM or
         WhatsApp.

@@ -376,6 +376,15 @@ export function ProductForm({
           />
           Best seller (show on checkout)
         </label>
+        <label className="flex items-center gap-2 text-sm text-navy">
+          <input
+            type="checkbox"
+            checked={data.featured}
+            onChange={(e) => set("featured", e.target.checked)}
+            className="h-4 w-4 accent-navy"
+          />
+          Featured
+        </label>
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
