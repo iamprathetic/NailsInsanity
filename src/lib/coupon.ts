@@ -16,20 +16,15 @@ export async function evaluateCoupon(
   const code = (rawCode || "").trim().toUpperCase();
   if (!code) return { ok: false, message: "Enter a coupon code." };
 
+  // Every failure below returns the same generic message. Distinguishing
+  // "expired" / "needs more items" / "doesn't exist" would let an attacker
+  // confirm which codes are real without ever seeing a valid discount.
+  const invalid = { ok: false as const, message: "Invalid coupon code." };
+
   const coupon = await prisma.coupon.findUnique({ where: { code } });
-  if (!coupon || !coupon.active) {
-    return { ok: false, message: "Invalid coupon code." };
-  }
-  if (coupon.expiresAt && coupon.expiresAt.getTime() < Date.now()) {
-    return { ok: false, message: "This coupon has expired." };
-  }
-  if (cartQty < coupon.minSets) {
-    const need = coupon.minSets;
-    return {
-      ok: false,
-      message: `Add ${need} set${need > 1 ? "s" : ""} or more to use this coupon.`,
-    };
-  }
+  if (!coupon || !coupon.active) return invalid;
+  if (coupon.expiresAt && coupon.expiresAt.getTime() < Date.now()) return invalid;
+  if (cartQty < coupon.minSets) return invalid;
 
   let discount =
     coupon.type === "percent"

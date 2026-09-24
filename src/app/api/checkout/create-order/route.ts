@@ -14,6 +14,7 @@ import {
 } from "@/lib/mystery";
 import { shippingFeeFor } from "@/lib/site";
 import { evaluateCoupon } from "@/lib/coupon";
+import { clientIp, rateLimit } from "@/lib/rateLimit";
 
 const bodySchema = z.object({
   customer: customerSchema,
@@ -22,13 +23,26 @@ const bodySchema = z.object({
   couponCode: z.string().optional().nullable(),
 });
 
-// Short, human-friendly order reference, e.g. NI-8F3K2A.
+// Short, human-friendly order reference, e.g. NI-8F3K2A91. Uses the full
+// 5 random bytes (40 bits) unsliced — this reference is also the only key
+// needed to view the order's shipping address at /order/<reference>, so it
+// needs real entropy rather than a short, guessable code.
 function makeReference(): string {
-  const raw = crypto.randomBytes(4).toString("hex").toUpperCase();
-  return `NI-${raw.slice(0, 6)}`;
+  const raw = crypto.randomBytes(5).toString("hex").toUpperCase();
+  return `NI-${raw}`;
 }
 
 export async function POST(req: Request) {
+  // 10 order attempts per 10 minutes per IP — generous enough for a
+  // customer retrying after a typo or a network hiccup, but blocks
+  // scripted spam of DB rows / Razorpay orders.
+  if (!rateLimit(`create-order:${clientIp(req)}`, 10, 10 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: "Too many attempts. Please wait a few minutes and try again." },
+      { status: 429 }
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();
